@@ -28,3 +28,24 @@ public record CredenciaisRequest(
     [MinLength(8, ErrorMessage = "A senha deve ter pelo menos 8 caracteres.")]
         string Senha
 );
+
+public record CodigoAcessoResponse(string Codigo);
+
+public record IdentificarQrCodeRequest(
+    [Required(ErrorMessage = "O código de acesso é obrigatório.")] string Codigo
+);
+
+public record IdentificacaoQrCodeResponse(
+    Guid FuncionarioId,
+    string Nome,
+    Cargo Cargo,
+    bool PossuiPin,
+    bool AcessoBloqueado
+);
+
+public record QrCodePinRequest(
+    [Required(ErrorMessage = "O código de acesso é obrigatório.")] string Codigo,
+    [Required(ErrorMessage = "O PIN é obrigatório.")]
+    [RegularExpression(@"^\d{4}$", ErrorMessage = "O PIN deve ter exatamente 4 dígitos.")]
+        string Pin
+);
