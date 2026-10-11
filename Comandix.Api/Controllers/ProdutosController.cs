@@ -1,0 +1,113 @@
+using Comandix.Api.Dtos;
+using Comandix.Domain.Entities;
+using Comandix.Infrastructure.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace Comandix.Api.Controllers;
+
+[ApiController]
+[Route("api/produtos")]
+public class ProdutosController(ComandixDbContext context) : ControllerBase
+{
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<ProdutoResponse>>> Listar(
+        [FromQuery] Guid? categoriaId,
+        [FromQuery] bool apenasDisponiveis = false)
+    {
+        var query = context.Produtos.AsNoTracking();
+
+        if (categoriaId.HasValue)
+            query = query.Where(p => p.CategoriaId == categoriaId.Value);
+
+        if (apenasDisponiveis)
+            query = query.Where(p => p.Disponivel);
+
+        var produtos = await query
+            .OrderBy(p => p.Categoria.Nome)
+            .ThenBy(p => p.Nome)
+            .Select(p => new ProdutoResponse(p.Id, p.Nome, p.Descricao, p.Preco, p.Disponivel, p.CategoriaId, p.Categoria.Nome))
+            .ToListAsync();
+
+        return Ok(produtos);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<ProdutoResponse>> ObterPorId(Guid id)
+    {
+        var produto = await BuscarResponse(id);
+        return produto is null ? NotFound() : Ok(produto);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<ProdutoResponse>> Criar(ProdutoRequest request)
+    {
+        if (!await context.Categorias.AnyAsync(c => c.Id == request.CategoriaId))
+            return BadRequest(new { mensagem = "Categoria não encontrada." });
+
+        var produto = new Produto(request.Nome.Trim(), request.Descricao?.Trim(), request.Preco, request.CategoriaId);
+        context.Produtos.Add(produto);
+        await context.SaveChangesAsync();
+
+        var response = await BuscarResponse(produto.Id);
+        return CreatedAtAction(nameof(ObterPorId), new { id = produto.Id }, response);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Atualizar(Guid id, ProdutoRequest request)
+    {
+        var produto = await context.Produtos.FindAsync(id);
+        if (produto is null) return NotFound();
+
+        if (!await context.Categorias.AnyAsync(c => c.Id == request.CategoriaId))
+            return BadRequest(new { mensagem = "Categoria não encontrada." });
+
+        produto.Atualizar(request.Nome.Trim(), request.Descricao?.Trim(), request.Preco, request.CategoriaId);
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpPatch("{id:guid}/disponivel")]
+    public async Task<IActionResult> MarcarDisponivel(Guid id)
+    {
+        var produto = await context.Produtos.FindAsync(id);
+        if (produto is null) return NotFound();
+
+        produto.MarcarDisponivel();
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpPatch("{id:guid}/indisponivel")]
+    public async Task<IActionResult> MarcarIndisponivel(Guid id)
+    {
+        var produto = await context.Produtos.FindAsync(id);
+        if (produto is null) return NotFound();
+
+        produto.MarcarIndisponivel();
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Remover(Guid id)
+    {
+        var produto = await context.Produtos.FindAsync(id);
+        if (produto is null) return NotFound();
+
+        context.Produtos.Remove(produto);
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    private Task<ProdutoResponse?> BuscarResponse(Guid id) =>
+        context.Produtos
+            .AsNoTracking()
+            .Where(p => p.Id == id)
+            .Select(p => new ProdutoResponse(p.Id, p.Nome, p.Descricao, p.Preco, p.Disponivel, p.CategoriaId, p.Categoria.Nome))
+            .FirstOrDefaultAsync();
+}
