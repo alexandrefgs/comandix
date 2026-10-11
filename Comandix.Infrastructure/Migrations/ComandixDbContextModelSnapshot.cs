@@ -95,6 +95,9 @@ namespace Comandix.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("AcessoBloqueado")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("Ativo")
                         .HasColumnType("bit");
 
@@ -102,6 +105,10 @@ namespace Comandix.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("CodigoAcessoHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<DateTime>("CriadoEm")
                         .HasColumnType("datetime2");
@@ -111,15 +118,26 @@ namespace Comandix.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("PinHash")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("SenhaHash")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("TentativasPinFalhas")
+                        .HasColumnType("int");
 
                     b.Property<string>("Usuario")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CodigoAcessoHash")
+                        .IsUnique()
+                        .HasFilter("[CodigoAcessoHash] IS NOT NULL");
 
                     b.HasIndex("Usuario")
                         .IsUnique()
