@@ -111,7 +111,19 @@ namespace Comandix.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("SenhaHash")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Usuario")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("Usuario")
+                        .IsUnique()
+                        .HasFilter("[Usuario] IS NOT NULL");
 
                     b.ToTable("Funcionarios", (string)null);
                 });

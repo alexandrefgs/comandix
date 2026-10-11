@@ -14,5 +14,12 @@ public class FuncionarioConfiguration : IEntityTypeConfiguration<Funcionario>
         builder.Property(f => f.Nome).IsRequired().HasMaxLength(100);
 
         builder.Property(f => f.Cargo).HasConversion<string>().HasMaxLength(20);
+
+        builder.Property(f => f.Usuario).HasMaxLength(50);
+        builder.Property(f => f.SenhaHash).HasMaxLength(200);
+
+        builder.HasIndex(f => f.Usuario).IsUnique().HasFilter("[Usuario] IS NOT NULL");
+
+        builder.Ignore(f => f.AcessaPorSenha);
     }
 }
