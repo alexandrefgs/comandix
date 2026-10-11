@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Comandix.Api.Tests/Comandix.Api.Tests.csproj" />
   <Project Path="Comandix.Api/Comandix.Api.csproj" />
   <Project Path="Comandix.Domain.Tests/Comandix.Domain.Tests.csproj" />
   <Project Path="Comandix.Domain/Comandix.Domain.csproj" />
