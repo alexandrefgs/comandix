@@ -30,14 +30,14 @@ public class ItemComanda : EntityBase
         Observacao = observacao;
     }
 
-    public void AvancarStatus()
+    internal void AvancarStatus()
     {
         Status = Status switch
         {
             StatusItem.Pendente => StatusItem.EmPreparo,
             StatusItem.EmPreparo => StatusItem.Pronto,
             StatusItem.Pronto => StatusItem.Entregue,
-            _ => throw new DomainException("Este item não pode avançar de status.")
+            _ => throw new DomainException("Este item não pode avançar de status."),
         };
     }
 

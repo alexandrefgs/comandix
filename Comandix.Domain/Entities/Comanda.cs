@@ -23,13 +23,18 @@ public class Comanda : EntityBase
     public IReadOnlyCollection<ItemComanda> Itens => _itens;
     public IReadOnlyCollection<PessoaComanda> Pessoas => _pessoas;
 
-    public decimal Consumo => _itens
-        .Where(i => i.Status != StatusItem.Cancelado)
-        .Sum(i => i.Subtotal);
+    public decimal Consumo =>
+        _itens.Where(i => i.Status != StatusItem.Cancelado).Sum(i => i.Subtotal);
+
+    public decimal TotalComTaxa => Consumo + CalcularTaxaServico();
 
     protected Comanda() { }
 
-    public Comanda(Mesa mesa, Funcionario garcom, decimal percentualTaxaServico = PercentualTaxaServicoPadrao)
+    public Comanda(
+        Mesa mesa,
+        Funcionario garcom,
+        decimal percentualTaxaServico = PercentualTaxaServicoPadrao
+    )
     {
         if (!garcom.Ativo || garcom.Cargo != Cargo.Garcom)
             throw new DomainException("A comanda deve ser aberta por um garçom ativo.");
@@ -65,6 +70,12 @@ public class Comanda : EntityBase
     {
         GarantirAberta();
         ObterItem(itemId).Cancelar();
+    }
+
+    public void AvancarStatusItem(Guid itemId)
+    {
+        GarantirAberta();
+        ObterItem(itemId).AvancarStatus();
     }
 
     public void DefinirCobrancaTaxaServico(bool cobrar)
@@ -117,9 +128,8 @@ public class Comanda : EntityBase
 
         foreach (var item in _itens.Where(i => i.Status != StatusItem.Cancelado))
         {
-            var pagantes = item.Pagantes.Count > 0
-                ? item.Pagantes.OrderBy(p => p.Ordem).ToList()
-                : pessoas;
+            var pagantes =
+                item.Pagantes.Count > 0 ? item.Pagantes.OrderBy(p => p.Ordem).ToList() : pessoas;
 
             var partes = Ratear(item.Subtotal, pagantes.Count);
 
@@ -132,7 +142,11 @@ public class Comanda : EntityBase
             {
                 var consumo = consumos[p.Id];
                 var taxa = CobrarTaxaServico
-                    ? Math.Round(consumo * PercentualTaxaServico / 100, 2, MidpointRounding.AwayFromZero)
+                    ? Math.Round(
+                        consumo * PercentualTaxaServico / 100,
+                        2,
+                        MidpointRounding.AwayFromZero
+                    )
                     : 0m;
 
                 return new DivisaoPessoa(p.Id, p.Nome, consumo, taxa, consumo + taxa);

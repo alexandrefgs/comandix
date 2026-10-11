@@ -23,5 +23,6 @@ public class Funcionario : EntityBase
     }
 
     public void Ativar() => Ativo = true;
+
     public void Desativar() => Ativo = false;
 }

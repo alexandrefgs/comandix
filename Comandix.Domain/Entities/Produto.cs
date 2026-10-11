@@ -28,5 +28,6 @@ public class Produto : EntityBase
     }
 
     public void MarcarDisponivel() => Disponivel = true;
+
     public void MarcarIndisponivel() => Disponivel = false;
 }

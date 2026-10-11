@@ -14,6 +14,8 @@ public class Categoria : EntityBase
     }
 
     public void Atualizar(string nome) => Nome = nome;
+
     public void Ativar() => Ativa = true;
+
     public void Desativar() => Ativa = false;
 }

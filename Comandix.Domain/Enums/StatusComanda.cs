@@ -4,5 +4,5 @@ public enum StatusComanda
 {
     Aberta = 1,
     Fechada = 2,
-    Cancelada = 3
+    Cancelada = 3,
 }

@@ -6,5 +6,5 @@ public enum StatusItem
     EmPreparo = 2,
     Pronto = 3,
     Entregue = 4,
-    Cancelado = 5
+    Cancelado = 5,
 }
