@@ -28,7 +28,9 @@ public class ComandixApiFactory : WebApplicationFactory<Program>
         var context = scope.ServiceProvider.GetRequiredService<ComandixDbContext>();
 
         if (!context.Database.GetConnectionString()!.Contains(BancoDeTestes))
-            throw new InvalidOperationException("Os testes não estão apontando para o banco de testes.");
+            throw new InvalidOperationException(
+                "Os testes não estão apontando para o banco de testes."
+            );
 
         context.Database.EnsureDeleted();
         context.Database.Migrate();

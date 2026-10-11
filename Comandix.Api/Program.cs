@@ -18,6 +18,7 @@ builder
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.AllowInputFormatterExceptionMessages = false;
+        options.JsonSerializerOptions.UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow;
     });
 
 builder.Services.ConfigureHttpJsonOptions(options =>

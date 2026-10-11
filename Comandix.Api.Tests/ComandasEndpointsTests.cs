@@ -19,17 +19,27 @@ public class ComandasEndpointsTests(ComandixApiFactory factory) : ApiTestBase(fa
         var comanda = await AbrirComanda(mesa.Id, garcom.Id);
         var url = $"api/comandas/{comanda.Id}";
 
-        await PostAsync<ComandaResponse>($"{url}/itens", new AdicionarItemRequest(pizza.Id, 1, "Sem cebola"));
-        await PostAsync<ComandaResponse>($"{url}/itens", new AdicionarItemRequest(cerveja.Id, 1, null));
+        await PostAsync<ComandaResponse>(
+            $"{url}/itens",
+            new AdicionarItemRequest(pizza.Id, 1, "Sem cebola")
+        );
+        await PostAsync<ComandaResponse>(
+            $"{url}/itens",
+            new AdicionarItemRequest(cerveja.Id, 1, null)
+        );
         comanda = await PutAsync<ComandaResponse>($"{url}/pessoas", new DefinirPessoasRequest(3));
 
         var joao = comanda.Divisao.First();
         var itemCerveja = comanda.Itens.Single(i => i.ProdutoId == cerveja.Id);
 
-        await PatchAsync<ComandaResponse>($"{url}/pessoas/{joao.PessoaId}", new RenomearPessoaRequest("João"));
+        await PatchAsync<ComandaResponse>(
+            $"{url}/pessoas/{joao.PessoaId}",
+            new RenomearPessoaRequest("João")
+        );
         comanda = await PutAsync<ComandaResponse>(
             $"{url}/itens/{itemCerveja.Id}/pagantes",
-            new AtribuirItemRequest([joao.PessoaId]));
+            new AtribuirItemRequest([joao.PessoaId])
+        );
 
         Assert.Equal(79.20m, comanda.Total);
         Assert.Equal("João", comanda.Divisao.First().Nome);
@@ -47,9 +57,13 @@ public class ComandasEndpointsTests(ComandixApiFactory factory) : ApiTestBase(fa
         var mesaAtualizada = await GetAsync<MesaResponse>($"api/mesas/{mesa.Id}");
         Assert.Equal(StatusMesa.Livre, mesaAtualizada.Status);
 
-        var hoje = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo"));
+        var hoje = TimeZoneInfo.ConvertTime(
+            DateTime.UtcNow,
+            TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo")
+        );
         var relatorio = await GetAsync<RelatorioTaxaServicoResponse>(
-            $"api/relatorios/taxa-servico?ano={hoje.Year}&mes={hoje.Month}&garcomId={garcom.Id}");
+            $"api/relatorios/taxa-servico?ano={hoje.Year}&mes={hoje.Month}&garcomId={garcom.Id}"
+        );
 
         var linha = Assert.Single(relatorio.Garcons);
         Assert.Equal(1, linha.Comandas);
@@ -63,7 +77,10 @@ public class ComandasEndpointsTests(ComandixApiFactory factory) : ApiTestBase(fa
         var garcom = await CriarGarcom();
         await AbrirComanda(mesa.Id, garcom.Id);
 
-        var response = await EnviarPost("api/comandas", new AbrirComandaRequest(mesa.Id, garcom.Id));
+        var response = await EnviarPost(
+            "api/comandas",
+            new AbrirComandaRequest(mesa.Id, garcom.Id)
+        );
 
         var problema = await LerProblema(response, HttpStatusCode.BadRequest);
         Assert.Equal("A mesa já está ocupada.", problema.Detail);
@@ -78,7 +95,8 @@ public class ComandasEndpointsTests(ComandixApiFactory factory) : ApiTestBase(fa
 
         var response = await EnviarPost(
             $"api/comandas/{comanda.Id}/itens",
-            new AdicionarItemRequest(produto.Id, 0, null));
+            new AdicionarItemRequest(produto.Id, 0, null)
+        );
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -89,7 +107,10 @@ public class ComandasEndpointsTests(ComandixApiFactory factory) : ApiTestBase(fa
         var categoria = await CriarCategoria();
         var produto = await CriarProduto(categoria.Id, "Pizza", 60m);
         var comanda = await AbrirComanda((await CriarMesa()).Id, (await CriarGarcom()).Id);
-        await PostAsync<ComandaResponse>($"api/comandas/{comanda.Id}/itens", new AdicionarItemRequest(produto.Id, 1, null));
+        await PostAsync<ComandaResponse>(
+            $"api/comandas/{comanda.Id}/itens",
+            new AdicionarItemRequest(produto.Id, 1, null)
+        );
 
         var response = await EnviarPost($"api/comandas/{comanda.Id}/fechar");
 

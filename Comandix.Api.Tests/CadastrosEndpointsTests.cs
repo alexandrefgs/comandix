@@ -14,7 +14,8 @@ public class CadastrosEndpointsTests(ComandixApiFactory factory) : ApiTestBase(f
 
         var response = await EnviarPost("api/mesas", new MesaRequest(mesa.Numero, 2));
 
-        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        var problema = await LerProblema(response, HttpStatusCode.Conflict);
+        Assert.Equal($"Já existe a mesa {mesa.Numero}.", problema.Detail);
     }
 
     [Fact]
@@ -26,9 +27,23 @@ public class CadastrosEndpointsTests(ComandixApiFactory factory) : ApiTestBase(f
     }
 
     [Fact]
+    public async Task CriarCategoria_ComCampoDesconhecido_DeveRetornar400()
+    {
+        var response = await Client.PostAsJsonAsync(
+            "api/categorias",
+            new { nome = "Cerveja", preco = 12 }
+        );
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task CriarFuncionario_ComCargoInvalido_DeveRetornar400()
     {
-        var response = await Client.PostAsJsonAsync("api/funcionarios", new { nome = "Ana", cargo = "Astronauta" });
+        var response = await Client.PostAsJsonAsync(
+            "api/funcionarios",
+            new { nome = "Ana", cargo = "Astronauta" }
+        );
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -41,7 +56,11 @@ public class CadastrosEndpointsTests(ComandixApiFactory factory) : ApiTestBase(f
 
         var response = await Client.DeleteAsync($"api/categorias/{categoria.Id}");
 
-        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        var problema = await LerProblema(response, HttpStatusCode.Conflict);
+        Assert.Equal(
+            "Não é possível remover uma categoria com produtos. Desative-a ou mova os produtos.",
+            problema.Detail
+        );
     }
 
     [Fact]
@@ -50,11 +69,18 @@ public class CadastrosEndpointsTests(ComandixApiFactory factory) : ApiTestBase(f
         var categoria = await CriarCategoria();
         var produto = await CriarProduto(categoria.Id, "Pizza", 60m);
         var comanda = await AbrirComanda((await CriarMesa()).Id, (await CriarGarcom()).Id);
-        await PostAsync<ComandaResponse>($"api/comandas/{comanda.Id}/itens", new AdicionarItemRequest(produto.Id, 1, null));
+        await PostAsync<ComandaResponse>(
+            $"api/comandas/{comanda.Id}/itens",
+            new AdicionarItemRequest(produto.Id, 1, null)
+        );
 
         var response = await Client.DeleteAsync($"api/produtos/{produto.Id}");
 
-        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        var problema = await LerProblema(response, HttpStatusCode.Conflict);
+        Assert.Equal(
+            "O produto já foi pedido em comandas. Marque-o como indisponível em vez de remover.",
+            problema.Detail
+        );
     }
 
     [Fact]
