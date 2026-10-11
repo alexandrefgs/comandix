@@ -11,8 +11,9 @@ public class ComandixApiFactory : WebApplicationFactory<Program>
 {
     private const string BancoDeTestes = "ComandixDb_Tests";
 
-    private const string ConnectionString =
-        $"Server=(localdb)\\mssqllocaldb;Database={BancoDeTestes};Trusted_Connection=True;TrustServerCertificate=True";
+    private static readonly string ConnectionString =
+        Environment.GetEnvironmentVariable("COMANDIX_TEST_CONNECTION")
+        ?? $"Server=(localdb)\\mssqllocaldb;Database={BancoDeTestes};Trusted_Connection=True;TrustServerCertificate=True";
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
