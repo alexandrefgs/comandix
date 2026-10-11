@@ -92,9 +92,19 @@ Os testes de integração criam e destroem o banco `ComandixDb_Tests` a cada exe
 - [x] Fila da cozinha e relatório de taxa por garçom
 - [x] Testes automatizados e CI
 - [x] Autenticação com JWT, permissões por cargo e login por QR Code + PIN
-- [ ] Caixa e pagamentos
+- [ ] **Caixa e pagamentos**
+  - [ ] Abertura do caixa com fundo de troco e fechamento com conferência (diferença entre esperado e contado)
+  - [ ] Sangria e suprimento
+  - [ ] Pagamentos por pessoa da divisão (dinheiro com troco, Pix, débito e crédito)
+  - [ ] Estorno de pagamento com motivo
+  - [ ] Comanda só fecha com saldo zerado
+- [ ] **Nota fiscal (NFC-e)**
+  - [ ] Emissão simulada no fechamento da comanda, com chave de acesso de 44 dígitos e dígito verificador (módulo 11), marcada como documento sem valor fiscal
+  - [ ] Emissor desacoplado por interface (`IEmissorNotaFiscal`), pronto para troca por um provedor real
+  - [ ] Integração com provedor real de NFC-e
 - [ ] Front-end em Angular
 - [ ] Deploy
+- [ ] Múltiplos caixas simultâneos
 - [ ] Estoque e ficha técnica
 
 ## Autor
