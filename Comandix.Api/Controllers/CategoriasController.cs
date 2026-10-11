@@ -13,8 +13,8 @@ public class CategoriasController(ComandixDbContext context) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CategoriaResponse>>> Listar()
     {
-        var categorias = await context.Categorias
-            .AsNoTracking()
+        var categorias = await context
+            .Categorias.AsNoTracking()
             .OrderBy(c => c.Nome)
             .Select(c => new CategoriaResponse(c.Id, c.Nome, c.Ativa))
             .ToListAsync();
@@ -25,8 +25,8 @@ public class CategoriasController(ComandixDbContext context) : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<CategoriaResponse>> ObterPorId(Guid id)
     {
-        var categoria = await context.Categorias
-            .AsNoTracking()
+        var categoria = await context
+            .Categorias.AsNoTracking()
             .Where(c => c.Id == id)
             .Select(c => new CategoriaResponse(c.Id, c.Nome, c.Ativa))
             .FirstOrDefaultAsync();
@@ -54,7 +54,8 @@ public class CategoriasController(ComandixDbContext context) : ControllerBase
     public async Task<IActionResult> Atualizar(Guid id, CategoriaRequest request)
     {
         var categoria = await context.Categorias.FindAsync(id);
-        if (categoria is null) return NotFound();
+        if (categoria is null)
+            return NotFound();
 
         var nome = request.Nome.Trim();
 
@@ -71,7 +72,8 @@ public class CategoriasController(ComandixDbContext context) : ControllerBase
     public async Task<IActionResult> Ativar(Guid id)
     {
         var categoria = await context.Categorias.FindAsync(id);
-        if (categoria is null) return NotFound();
+        if (categoria is null)
+            return NotFound();
 
         categoria.Ativar();
         await context.SaveChangesAsync();
@@ -83,7 +85,8 @@ public class CategoriasController(ComandixDbContext context) : ControllerBase
     public async Task<IActionResult> Desativar(Guid id)
     {
         var categoria = await context.Categorias.FindAsync(id);
-        if (categoria is null) return NotFound();
+        if (categoria is null)
+            return NotFound();
 
         categoria.Desativar();
         await context.SaveChangesAsync();
@@ -95,10 +98,16 @@ public class CategoriasController(ComandixDbContext context) : ControllerBase
     public async Task<IActionResult> Remover(Guid id)
     {
         var categoria = await context.Categorias.FindAsync(id);
-        if (categoria is null) return NotFound();
+        if (categoria is null)
+            return NotFound();
 
         if (await context.Produtos.AnyAsync(p => p.CategoriaId == id))
-            return Conflict(new { mensagem = "Não é possível remover uma categoria com produtos. Desative-a ou mova os produtos." });
+            return Conflict(
+                new
+                {
+                    mensagem = "Não é possível remover uma categoria com produtos. Desative-a ou mova os produtos.",
+                }
+            );
 
         context.Categorias.Remove(categoria);
         await context.SaveChangesAsync();
