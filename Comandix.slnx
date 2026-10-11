@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Comandix.Api/Comandix.Api.csproj" />
+  <Project Path="Comandix.Domain/Comandix.Domain.csproj" />
+  <Project Path="Comandix.Infrastructure/Comandix.Infrastructure.csproj" />
+</Solution>
