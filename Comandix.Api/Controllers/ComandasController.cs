@@ -10,13 +10,14 @@ namespace Comandix.Api.Controllers;
 
 [ApiController]
 [Route("api/comandas")]
-public class ComandasController(ComandixDbContext context) : ControllerBase
+public class ComandasController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ComandaResumoResponse>>> Listar(
         [FromQuery] StatusComanda status = StatusComanda.Aberta,
         [FromQuery] Guid? mesaId = null,
-        [FromQuery] Guid? garcomId = null)
+        [FromQuery] Guid? garcomId = null
+    )
     {
         var query = ComandasCompletas().AsNoTracking().Where(c => c.Status == status);
 
@@ -43,11 +44,11 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
     {
         var mesa = await context.Mesas.FindAsync(request.MesaId);
         if (mesa is null)
-            return Problem(detail: "Mesa não encontrada.", statusCode: StatusCodes.Status400BadRequest);
+            return RequisicaoInvalida("Mesa não encontrada.");
 
         var garcom = await context.Funcionarios.FindAsync(request.GarcomId);
         if (garcom is null)
-            return Problem(detail: "Garçom não encontrado.", statusCode: StatusCodes.Status400BadRequest);
+            return RequisicaoInvalida("Garçom não encontrado.");
 
         var comanda = new Comanda(mesa, garcom);
         context.Comandas.Add(comanda);
@@ -58,21 +59,25 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
         }
         catch (DbUpdateException)
         {
-            return Problem(detail: "Já existe uma comanda aberta para esta mesa.", statusCode: StatusCodes.Status409Conflict);
+            return Conflito("Já existe uma comanda aberta para esta mesa.");
         }
 
         return CreatedAtAction(nameof(ObterPorId), new { id = comanda.Id }, comanda.ToResponse());
     }
 
     [HttpPost("{id:guid}/itens")]
-    public async Task<ActionResult<ComandaResponse>> AdicionarItem(Guid id, AdicionarItemRequest request)
+    public async Task<ActionResult<ComandaResponse>> AdicionarItem(
+        Guid id,
+        AdicionarItemRequest request
+    )
     {
         var comanda = await ObterComanda(id);
-        if (comanda is null) return NotFound();
+        if (comanda is null)
+            return NotFound();
 
         var produto = await context.Produtos.FindAsync(request.ProdutoId);
         if (produto is null)
-            return Problem(detail: "Produto não encontrado.", statusCode: StatusCodes.Status400BadRequest);
+            return RequisicaoInvalida("Produto não encontrado.");
 
         comanda.AdicionarItem(produto, request.Quantidade, request.Observacao?.Trim());
         await context.SaveChangesAsync();
@@ -84,7 +89,8 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
     public async Task<ActionResult<ComandaResponse>> CancelarItem(Guid id, Guid itemId)
     {
         var comanda = await ObterComanda(id);
-        if (comanda is null) return NotFound();
+        if (comanda is null)
+            return NotFound();
 
         comanda.CancelarItem(itemId);
         await context.SaveChangesAsync();
@@ -96,7 +102,8 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
     public async Task<ActionResult<ComandaResponse>> AvancarItem(Guid id, Guid itemId)
     {
         var comanda = await ObterComanda(id);
-        if (comanda is null) return NotFound();
+        if (comanda is null)
+            return NotFound();
 
         comanda.AvancarStatusItem(itemId);
         await context.SaveChangesAsync();
@@ -105,10 +112,15 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
     }
 
     [HttpPut("{id:guid}/itens/{itemId:guid}/pagantes")]
-    public async Task<ActionResult<ComandaResponse>> AtribuirItem(Guid id, Guid itemId, AtribuirItemRequest request)
+    public async Task<ActionResult<ComandaResponse>> AtribuirItem(
+        Guid id,
+        Guid itemId,
+        AtribuirItemRequest request
+    )
     {
         var comanda = await ObterComanda(id);
-        if (comanda is null) return NotFound();
+        if (comanda is null)
+            return NotFound();
 
         comanda.AtribuirItem(itemId, request.PessoaIds);
         await context.SaveChangesAsync();
@@ -117,10 +129,14 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
     }
 
     [HttpPut("{id:guid}/pessoas")]
-    public async Task<ActionResult<ComandaResponse>> DefinirPessoas(Guid id, DefinirPessoasRequest request)
+    public async Task<ActionResult<ComandaResponse>> DefinirPessoas(
+        Guid id,
+        DefinirPessoasRequest request
+    )
     {
         var comanda = await ObterComanda(id);
-        if (comanda is null) return NotFound();
+        if (comanda is null)
+            return NotFound();
 
         comanda.DefinirQuantidadePessoas(request.Quantidade);
         await context.SaveChangesAsync();
@@ -129,10 +145,15 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
     }
 
     [HttpPatch("{id:guid}/pessoas/{pessoaId:guid}")]
-    public async Task<ActionResult<ComandaResponse>> RenomearPessoa(Guid id, Guid pessoaId, RenomearPessoaRequest request)
+    public async Task<ActionResult<ComandaResponse>> RenomearPessoa(
+        Guid id,
+        Guid pessoaId,
+        RenomearPessoaRequest request
+    )
     {
         var comanda = await ObterComanda(id);
-        if (comanda is null) return NotFound();
+        if (comanda is null)
+            return NotFound();
 
         comanda.RenomearPessoa(pessoaId, request.Nome.Trim());
         await context.SaveChangesAsync();
@@ -141,10 +162,14 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
     }
 
     [HttpPatch("{id:guid}/taxa-servico")]
-    public async Task<ActionResult<ComandaResponse>> DefinirTaxaServico(Guid id, TaxaServicoRequest request)
+    public async Task<ActionResult<ComandaResponse>> DefinirTaxaServico(
+        Guid id,
+        TaxaServicoRequest request
+    )
     {
         var comanda = await ObterComanda(id);
-        if (comanda is null) return NotFound();
+        if (comanda is null)
+            return NotFound();
 
         comanda.DefinirCobrancaTaxaServico(request.Cobrar);
         await context.SaveChangesAsync();
@@ -156,7 +181,8 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
     public async Task<ActionResult<ComandaResponse>> Fechar(Guid id)
     {
         var comanda = await ObterComanda(id);
-        if (comanda is null) return NotFound();
+        if (comanda is null)
+            return NotFound();
 
         comanda.Fechar();
         await context.SaveChangesAsync();
@@ -168,7 +194,8 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
     public async Task<ActionResult<ComandaResponse>> Cancelar(Guid id)
     {
         var comanda = await ObterComanda(id);
-        if (comanda is null) return NotFound();
+        if (comanda is null)
+            return NotFound();
 
         comanda.Cancelar();
         await context.SaveChangesAsync();
@@ -177,11 +204,12 @@ public class ComandasController(ComandixDbContext context) : ControllerBase
     }
 
     private IQueryable<Comanda> ComandasCompletas() =>
-        context.Comandas
-            .Include(c => c.Mesa)
+        context
+            .Comandas.Include(c => c.Mesa)
             .Include(c => c.Garcom)
             .Include(c => c.Pessoas)
-            .Include(c => c.Itens).ThenInclude(i => i.Pagantes)
+            .Include(c => c.Itens)
+                .ThenInclude(i => i.Pagantes)
             .AsSplitQuery();
 
     private Task<Comanda?> ObterComanda(Guid id) =>

@@ -8,7 +8,7 @@ namespace Comandix.Api.Controllers;
 
 [ApiController]
 [Route("api/produtos")]
-public class ProdutosController(ComandixDbContext context) : ControllerBase
+public class ProdutosController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProdutoResponse>>> Listar(
@@ -52,7 +52,7 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
     public async Task<ActionResult<ProdutoResponse>> Criar(ProdutoRequest request)
     {
         if (!await context.Categorias.AnyAsync(c => c.Id == request.CategoriaId))
-            return BadRequest(new { mensagem = "Categoria não encontrada." });
+            return RequisicaoInvalida("Categoria não encontrada.");
 
         var produto = new Produto(
             request.Nome.Trim(),
@@ -75,7 +75,7 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
             return NotFound();
 
         if (!await context.Categorias.AnyAsync(c => c.Id == request.CategoriaId))
-            return BadRequest(new { mensagem = "Categoria não encontrada." });
+            return RequisicaoInvalida("Categoria não encontrada.");
 
         produto.Atualizar(
             request.Nome.Trim(),
@@ -122,11 +122,8 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
             return NotFound();
 
         if (await context.Set<ItemComanda>().AnyAsync(i => i.ProdutoId == id))
-            return Conflict(
-                new
-                {
-                    mensagem = "O produto já foi pedido em comandas. Marque-o como indisponível em vez de remover.",
-                }
+            return Conflito(
+                "O produto já foi pedido em comandas. Marque-o como indisponível em vez de remover."
             );
 
         context.Produtos.Remove(produto);

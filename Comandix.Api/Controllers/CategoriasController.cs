@@ -8,7 +8,7 @@ namespace Comandix.Api.Controllers;
 
 [ApiController]
 [Route("api/categorias")]
-public class CategoriasController(ComandixDbContext context) : ControllerBase
+public class CategoriasController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CategoriaResponse>>> Listar()
@@ -40,7 +40,7 @@ public class CategoriasController(ComandixDbContext context) : ControllerBase
         var nome = request.Nome.Trim();
 
         if (await context.Categorias.AnyAsync(c => c.Nome == nome))
-            return Conflict(new { mensagem = "Já existe uma categoria com esse nome." });
+            return Conflito("Já existe uma categoria com esse nome.");
 
         var categoria = new Categoria(nome);
         context.Categorias.Add(categoria);
@@ -60,7 +60,7 @@ public class CategoriasController(ComandixDbContext context) : ControllerBase
         var nome = request.Nome.Trim();
 
         if (await context.Categorias.AnyAsync(c => c.Nome == nome && c.Id != id))
-            return Conflict(new { mensagem = "Já existe uma categoria com esse nome." });
+            return Conflito("Já existe uma categoria com esse nome.");
 
         categoria.Atualizar(nome);
         await context.SaveChangesAsync();
@@ -102,11 +102,8 @@ public class CategoriasController(ComandixDbContext context) : ControllerBase
             return NotFound();
 
         if (await context.Produtos.AnyAsync(p => p.CategoriaId == id))
-            return Conflict(
-                new
-                {
-                    mensagem = "Não é possível remover uma categoria com produtos. Desative-a ou mova os produtos.",
-                }
+            return Conflito(
+                "Não é possível remover uma categoria com produtos. Desative-a ou mova os produtos."
             );
 
         context.Categorias.Remove(categoria);

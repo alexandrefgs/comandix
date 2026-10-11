@@ -8,18 +8,20 @@ namespace Comandix.Api.Controllers;
 
 [ApiController]
 [Route("api/cozinha")]
-public class CozinhaController(ComandixDbContext context) : ControllerBase
+public class CozinhaController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet("fila")]
     public async Task<ActionResult<IEnumerable<FilaCozinhaItemResponse>>> Fila()
     {
-        var fila = await context.Comandas
-            .AsNoTracking()
+        var fila = await context
+            .Comandas.AsNoTracking()
             .Where(c => c.Status == StatusComanda.Aberta)
             .SelectMany(c => c.Itens, (c, i) => new { Comanda = c, Item = i })
-            .Where(x => x.Item.Status == StatusItem.Pendente
+            .Where(x =>
+                x.Item.Status == StatusItem.Pendente
                 || x.Item.Status == StatusItem.EmPreparo
-                || x.Item.Status == StatusItem.Pronto)
+                || x.Item.Status == StatusItem.Pronto
+            )
             .OrderBy(x => x.Item.CriadoEm)
             .Select(x => new FilaCozinhaItemResponse(
                 x.Comanda.Id,
@@ -29,7 +31,8 @@ public class CozinhaController(ComandixDbContext context) : ControllerBase
                 x.Item.Quantidade,
                 x.Item.Observacao,
                 x.Item.Status,
-                x.Item.CriadoEm))
+                x.Item.CriadoEm
+            ))
             .ToListAsync();
 
         return Ok(fila);

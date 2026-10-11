@@ -9,7 +9,7 @@ namespace Comandix.Api.Controllers;
 
 [ApiController]
 [Route("api/funcionarios")]
-public class FuncionariosController(ComandixDbContext context) : ControllerBase
+public class FuncionariosController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<FuncionarioResponse>>> Listar(
@@ -99,12 +99,7 @@ public class FuncionariosController(ComandixDbContext context) : ControllerBase
                 c.GarcomId == id && c.Status == StatusComanda.Aberta
             )
         )
-            return Conflict(
-                new
-                {
-                    mensagem = "O funcionário tem comandas abertas. Feche-as antes de desativá-lo.",
-                }
-            );
+            return Conflito("O funcionário tem comandas abertas. Feche-as antes de desativá-lo.");
 
         funcionario.Desativar();
         await context.SaveChangesAsync();

@@ -9,7 +9,7 @@ namespace Comandix.Api.Controllers;
 
 [ApiController]
 [Route("api/mesas")]
-public class MesasController(ComandixDbContext context) : ControllerBase
+public class MesasController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MesaResponse>>> Listar(
@@ -49,7 +49,7 @@ public class MesasController(ComandixDbContext context) : ControllerBase
     public async Task<ActionResult<MesaResponse>> Criar(MesaRequest request)
     {
         if (await context.Mesas.AnyAsync(m => m.Numero == request.Numero))
-            return Conflict(new { mensagem = $"Já existe a mesa {request.Numero}." });
+            return Conflito($"Já existe a mesa {request.Numero}.");
 
         var mesa = new Mesa(request.Numero, request.Capacidade);
         context.Mesas.Add(mesa);
@@ -73,7 +73,7 @@ public class MesasController(ComandixDbContext context) : ControllerBase
             return NotFound();
 
         if (await context.Mesas.AnyAsync(m => m.Numero == request.Numero && m.Id != id))
-            return Conflict(new { mensagem = $"Já existe a mesa {request.Numero}." });
+            return Conflito($"Já existe a mesa {request.Numero}.");
 
         mesa.Atualizar(request.Numero, request.Capacidade);
         await context.SaveChangesAsync();
