@@ -6,6 +6,9 @@ namespace Comandix.Domain.Tests.Entities;
 
 public class ComandaTests
 {
+    private static readonly Guid CaixaId = Guid.NewGuid();
+    private static readonly Guid OperadorId = Guid.NewGuid();
+
     [Fact]
     public void Abrir_DeveOcuparMesaECriarUmaPessoa()
     {
@@ -256,6 +259,130 @@ public class ComandaTests
         Assert.Equal(StatusComanda.Cancelada, comanda.Status);
         Assert.Equal(0m, comanda.ValorTaxaServico);
         Assert.Equal(StatusMesa.Livre, mesa.Status);
+    }
+
+    [Fact]
+    public void RegistrarPagamento_DeveAtualizarTotalPagoESaldo()
+    {
+        var comanda = NovaComanda();
+        comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
+
+        comanda.RegistrarPagamento(CaixaId, FormaPagamento.Pix, 30m, null, null, OperadorId);
+
+        Assert.Equal(30m, comanda.TotalPago);
+        Assert.Equal(36m, comanda.Saldo);
+    }
+
+    [Fact]
+    public void RegistrarPagamento_AcimaDoSaldo_DeveLancarExcecao()
+    {
+        var comanda = NovaComanda();
+        comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
+
+        Assert.Throws<DomainException>(() =>
+            comanda.RegistrarPagamento(CaixaId, FormaPagamento.Pix, 70m, null, null, OperadorId)
+        );
+    }
+
+    [Fact]
+    public void RegistrarPagamento_EmDinheiro_DeveCalcularTroco()
+    {
+        var comanda = NovaComanda();
+        comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
+
+        var pagamento = comanda.RegistrarPagamento(
+            CaixaId,
+            FormaPagamento.Dinheiro,
+            66m,
+            100m,
+            null,
+            OperadorId
+        );
+
+        Assert.Equal(34m, pagamento.Troco);
+        Assert.Equal(0m, comanda.Saldo);
+    }
+
+    [Fact]
+    public void RegistrarPagamento_ComTrocoForaDoDinheiro_DeveLancarExcecao()
+    {
+        var comanda = NovaComanda();
+        comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
+
+        Assert.Throws<DomainException>(() =>
+            comanda.RegistrarPagamento(CaixaId, FormaPagamento.Pix, 66m, 100m, null, OperadorId)
+        );
+    }
+
+    [Fact]
+    public void RegistrarPagamento_PorPessoa_DeveRespeitarSaldoDaPessoa()
+    {
+        var comanda = NovaComanda();
+        comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
+        comanda.DefinirQuantidadePessoas(2);
+        var pessoa = comanda.Pessoas.Single(p => p.Ordem == 1);
+
+        comanda.RegistrarPagamento(CaixaId, FormaPagamento.Pix, 33m, null, pessoa.Id, OperadorId);
+
+        Assert.Equal(0m, comanda.SaldoDaPessoa(pessoa.Id));
+        Assert.Throws<DomainException>(() =>
+            comanda.RegistrarPagamento(
+                CaixaId,
+                FormaPagamento.Pix,
+                0.01m,
+                null,
+                pessoa.Id,
+                OperadorId
+            )
+        );
+    }
+
+    [Fact]
+    public void EstornarPagamento_DeveDevolverSaldoENaoPermitirEstornarDuasVezes()
+    {
+        var comanda = NovaComanda();
+        comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
+        var pagamento = comanda.RegistrarPagamento(
+            CaixaId,
+            FormaPagamento.CartaoDebito,
+            66m,
+            null,
+            null,
+            OperadorId
+        );
+
+        comanda.EstornarPagamento(pagamento.Id, "Lançado na forma errada", OperadorId);
+
+        Assert.True(pagamento.Estornado);
+        Assert.Equal(66m, comanda.Saldo);
+        Assert.Throws<DomainException>(() =>
+            comanda.EstornarPagamento(pagamento.Id, "De novo", OperadorId)
+        );
+    }
+
+    [Fact]
+    public void DefinirQuantidadePessoas_RemovendoPessoaQueJaPagou_DeveLancarExcecao()
+    {
+        var comanda = NovaComanda();
+        comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
+        comanda.DefinirQuantidadePessoas(2);
+        var pessoa2 = comanda.Pessoas.Single(p => p.Ordem == 2);
+        comanda.RegistrarPagamento(CaixaId, FormaPagamento.Pix, 33m, null, pessoa2.Id, OperadorId);
+
+        Assert.Throws<DomainException>(() => comanda.DefinirQuantidadePessoas(1));
+    }
+
+    [Fact]
+    public void Cancelar_ComPagamentoAtivo_DeveLancarExcecao()
+    {
+        var comanda = NovaComanda();
+        var item = comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
+        comanda.RegistrarPagamento(CaixaId, FormaPagamento.Pix, 10m, null, null, OperadorId);
+        comanda.CancelarItem(item.Id);
+
+        var excecao = Assert.Throws<DomainException>(comanda.Cancelar);
+
+        Assert.Equal("Estorne os pagamentos antes de cancelar a comanda.", excecao.Message);
     }
 
     private static Mesa NovaMesa() => new(1, 4);

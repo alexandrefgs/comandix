@@ -22,6 +22,49 @@ namespace Comandix.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Comandix.Domain.Entities.Caixa", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AbertoPorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("FechadoPorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("ValorAbertura")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("ValorContadoDinheiro")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("ValorEsperadoDinheiro")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status")
+                        .IsUnique()
+                        .HasFilter("[Status] = 'Aberto'");
+
+                    b.ToTable("Caixas", (string)null);
+                });
+
             modelBuilder.Entity("Comandix.Domain.Entities.Categoria", b =>
                 {
                     b.Property<Guid>("Id")
@@ -220,6 +263,96 @@ namespace Comandix.Infrastructure.Migrations
                     b.ToTable("Mesas", (string)null);
                 });
 
+            modelBuilder.Entity("Comandix.Domain.Entities.MovimentacaoCaixa", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CaixaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FuncionarioId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Motivo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("Valor")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaixaId");
+
+                    b.ToTable("MovimentacoesCaixa", (string)null);
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.Pagamento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CaixaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ComandaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Estornado")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("EstornadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("EstornadoPorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Forma")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("MotivoEstorno")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("PessoaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RegistradoPorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Valor")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("ValorRecebido")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaixaId");
+
+                    b.HasIndex("ComandaId");
+
+                    b.ToTable("Pagamentos", (string)null);
+                });
+
             modelBuilder.Entity("Comandix.Domain.Entities.PessoaComanda", b =>
                 {
                     b.Property<Guid>("Id")
@@ -331,6 +464,30 @@ namespace Comandix.Infrastructure.Migrations
                     b.Navigation("Produto");
                 });
 
+            modelBuilder.Entity("Comandix.Domain.Entities.MovimentacaoCaixa", b =>
+                {
+                    b.HasOne("Comandix.Domain.Entities.Caixa", null)
+                        .WithMany("Movimentacoes")
+                        .HasForeignKey("CaixaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.Pagamento", b =>
+                {
+                    b.HasOne("Comandix.Domain.Entities.Caixa", null)
+                        .WithMany()
+                        .HasForeignKey("CaixaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Comandix.Domain.Entities.Comanda", null)
+                        .WithMany("Pagamentos")
+                        .HasForeignKey("ComandaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Comandix.Domain.Entities.PessoaComanda", b =>
                 {
                     b.HasOne("Comandix.Domain.Entities.Comanda", null)
@@ -366,6 +523,11 @@ namespace Comandix.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Comandix.Domain.Entities.Caixa", b =>
+                {
+                    b.Navigation("Movimentacoes");
+                });
+
             modelBuilder.Entity("Comandix.Domain.Entities.Categoria", b =>
                 {
                     b.Navigation("Produtos");
@@ -374,6 +536,8 @@ namespace Comandix.Infrastructure.Migrations
             modelBuilder.Entity("Comandix.Domain.Entities.Comanda", b =>
                 {
                     b.Navigation("Itens");
+
+                    b.Navigation("Pagamentos");
 
                     b.Navigation("Pessoas");
                 });

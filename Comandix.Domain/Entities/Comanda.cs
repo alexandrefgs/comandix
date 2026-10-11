@@ -10,6 +10,7 @@ public class Comanda : EntityBase
 
     private readonly List<ItemComanda> _itens = new();
     private readonly List<PessoaComanda> _pessoas = new();
+    private readonly List<Pagamento> _pagamentos = new();
 
     public Guid MesaId { get; private set; }
     public Mesa Mesa { get; private set; } = null!;
@@ -22,11 +23,16 @@ public class Comanda : EntityBase
     public decimal ValorTaxaServico { get; private set; }
     public IReadOnlyCollection<ItemComanda> Itens => _itens;
     public IReadOnlyCollection<PessoaComanda> Pessoas => _pessoas;
+    public IReadOnlyCollection<Pagamento> Pagamentos => _pagamentos;
 
     public decimal Consumo =>
         _itens.Where(i => i.Status != StatusItem.Cancelado).Sum(i => i.Subtotal);
 
     public decimal TotalComTaxa => Consumo + CalcularTaxaServico();
+
+    public decimal TotalPago => _pagamentos.Where(p => !p.Estornado).Sum(p => p.Valor);
+
+    public decimal Saldo => TotalComTaxa - TotalPago;
 
     protected Comanda() { }
 
@@ -101,6 +107,9 @@ public class Comanda : EntityBase
         {
             var ultima = _pessoas.MaxBy(p => p.Ordem)!;
 
+            if (_pagamentos.Any(p => !p.Estornado && p.PessoaId == ultima.Id))
+                throw new DomainException("Não é possível remover uma pessoa que já pagou.");
+
             foreach (var item in _itens)
                 item.RemoverPagante(ultima);
 
@@ -156,6 +165,61 @@ public class Comanda : EntityBase
 
     public decimal CalcularTaxaServico() => CalcularDivisao().Sum(d => d.TaxaServico);
 
+    public Pagamento RegistrarPagamento(
+        Guid caixaId,
+        FormaPagamento forma,
+        decimal valor,
+        decimal? valorRecebido,
+        Guid? pessoaId,
+        Guid registradoPorId
+    )
+    {
+        GarantirAberta();
+
+        if (valor <= 0)
+            throw new DomainException("O valor do pagamento deve ser maior que zero.");
+
+        if (valor > Saldo)
+            throw new DomainException("O valor excede o saldo da comanda.");
+
+        if (pessoaId.HasValue && valor > SaldoDaPessoa(pessoaId.Value))
+            throw new DomainException("O valor excede o saldo dessa pessoa.");
+
+        if (forma != FormaPagamento.Dinheiro && valorRecebido.HasValue && valorRecebido != valor)
+            throw new DomainException("Troco só é permitido em pagamentos em dinheiro.");
+
+        var recebido = valorRecebido ?? valor;
+        if (recebido < valor)
+            throw new DomainException("O valor recebido é menor que o valor do pagamento.");
+
+        var pagamento = new Pagamento(caixaId, forma, valor, recebido, pessoaId, registradoPorId);
+        _pagamentos.Add(pagamento);
+        return pagamento;
+    }
+
+    public decimal SaldoDaPessoa(Guid pessoaId)
+    {
+        ObterPessoa(pessoaId);
+
+        var total = CalcularDivisao().Single(d => d.PessoaId == pessoaId).Total;
+        var pago = _pagamentos
+            .Where(p => !p.Estornado && p.PessoaId == pessoaId)
+            .Sum(p => p.Valor);
+
+        return total - pago;
+    }
+
+    public void EstornarPagamento(Guid pagamentoId, string motivo, Guid funcionarioId)
+    {
+        GarantirAberta();
+
+        var pagamento =
+            _pagamentos.FirstOrDefault(p => p.Id == pagamentoId)
+            ?? throw new DomainException("Pagamento não encontrado na comanda.");
+
+        pagamento.Estornar(motivo, funcionarioId);
+    }
+
     public void Fechar()
     {
         GarantirAberta();
@@ -178,6 +242,9 @@ public class Comanda : EntityBase
 
         if (_itens.Any(i => i.Status != StatusItem.Cancelado))
             throw new DomainException("Cancele todos os itens antes de cancelar a comanda.");
+
+        if (_pagamentos.Any(p => !p.Estornado))
+            throw new DomainException("Estorne os pagamentos antes de cancelar a comanda.");
 
         ValorTaxaServico = 0;
         Status = StatusComanda.Cancelada;

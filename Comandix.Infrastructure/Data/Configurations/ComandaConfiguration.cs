@@ -18,6 +18,8 @@ public class ComandaConfiguration : IEntityTypeConfiguration<Comanda>
 
         builder.Ignore(c => c.Consumo);
         builder.Ignore(c => c.TotalComTaxa);
+        builder.Ignore(c => c.TotalPago);
+        builder.Ignore(c => c.Saldo);
 
         builder
             .HasOne(c => c.Mesa)
@@ -42,9 +44,17 @@ public class ComandaConfiguration : IEntityTypeConfiguration<Comanda>
             .WithOne()
             .HasForeignKey(p => p.ComandaId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        builder
+            .HasMany(c => c.Pagamentos)
+            .WithOne()
+            .HasForeignKey(p => p.ComandaId)
+            .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Navigation(c => c.Pagamentos).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(c => c.Itens).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(c => c.Pessoas).UsePropertyAccessMode(PropertyAccessMode.Field);
+        
 
         builder.HasIndex(c => c.MesaId).IsUnique().HasFilter("[Status] = 'Aberta'");
 
