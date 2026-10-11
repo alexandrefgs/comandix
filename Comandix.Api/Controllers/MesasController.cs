@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comandix.Api.Controllers;
 
-[ApiController]
 [Route("api/mesas")]
 public class MesasController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<MesaResponse>>> Listar(
         [FromQuery] StatusMesa? status,
         [FromQuery] bool apenasAtivas = false
@@ -34,6 +34,8 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<MesaResponse>> ObterPorId(Guid id)
     {
         var mesa = await context
@@ -46,6 +48,8 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<MesaResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<MesaResponse>> Criar(MesaRequest request)
     {
         if (await context.Mesas.AnyAsync(m => m.Numero == request.Numero))
@@ -66,6 +70,9 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Atualizar(Guid id, MesaRequest request)
     {
         var mesa = await context.Mesas.FindAsync(id);
@@ -82,6 +89,8 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/ativar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Ativar(Guid id)
     {
         var mesa = await context.Mesas.FindAsync(id);
@@ -95,6 +104,8 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/desativar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desativar(Guid id)
     {
         var mesa = await context.Mesas.FindAsync(id);
@@ -108,6 +119,9 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Remover(Guid id)
     {
         var mesa = await context.Mesas.FindAsync(id);
@@ -115,12 +129,7 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
             return NotFound();
 
         if (await context.Comandas.AnyAsync(c => c.MesaId == id))
-            return Conflict(
-                new
-                {
-                    mensagem = "A mesa já tem comandas registradas. Desative-a em vez de remover.",
-                }
-            );
+            return Conflito("A mesa já tem comandas registradas. Desative-a em vez de remover.");
 
         context.Mesas.Remove(mesa);
         await context.SaveChangesAsync();

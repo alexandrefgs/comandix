@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comandix.Api.Controllers;
 
-[ApiController]
 [Route("api/produtos")]
 public class ProdutosController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<ProdutoResponse>>> Listar(
         [FromQuery] Guid? categoriaId,
         [FromQuery] bool apenasDisponiveis = false
@@ -42,6 +42,8 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProdutoResponse>> ObterPorId(Guid id)
     {
         var produto = await BuscarResponse(id);
@@ -49,6 +51,7 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<ProdutoResponse>(StatusCodes.Status201Created)]
     public async Task<ActionResult<ProdutoResponse>> Criar(ProdutoRequest request)
     {
         if (!await context.Categorias.AnyAsync(c => c.Id == request.CategoriaId))
@@ -68,6 +71,8 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Atualizar(Guid id, ProdutoRequest request)
     {
         var produto = await context.Produtos.FindAsync(id);
@@ -89,6 +94,8 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/disponivel")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> MarcarDisponivel(Guid id)
     {
         var produto = await context.Produtos.FindAsync(id);
@@ -102,6 +109,8 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/indisponivel")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> MarcarIndisponivel(Guid id)
     {
         var produto = await context.Produtos.FindAsync(id);
@@ -115,6 +124,9 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Remover(Guid id)
     {
         var produto = await context.Produtos.FindAsync(id);

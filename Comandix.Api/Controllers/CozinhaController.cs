@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comandix.Api.Controllers;
 
-[ApiController]
 [Route("api/cozinha")]
 public class CozinhaController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet("fila")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<FilaCozinhaItemResponse>>> Fila()
     {
         var fila = await context

@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comandix.Api.Controllers;
 
-[ApiController]
 [Route("api/categorias")]
 public class CategoriasController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<CategoriaResponse>>> Listar()
     {
         var categorias = await context
@@ -23,6 +23,8 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CategoriaResponse>> ObterPorId(Guid id)
     {
         var categoria = await context
@@ -35,6 +37,8 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<CategoriaResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<CategoriaResponse>> Criar(CategoriaRequest request)
     {
         var nome = request.Nome.Trim();
@@ -51,6 +55,9 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Atualizar(Guid id, CategoriaRequest request)
     {
         var categoria = await context.Categorias.FindAsync(id);
@@ -69,6 +76,8 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/ativar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Ativar(Guid id)
     {
         var categoria = await context.Categorias.FindAsync(id);
@@ -82,6 +91,8 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/desativar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desativar(Guid id)
     {
         var categoria = await context.Categorias.FindAsync(id);
@@ -95,6 +106,9 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Remover(Guid id)
     {
         var categoria = await context.Categorias.FindAsync(id);

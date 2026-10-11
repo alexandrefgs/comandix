@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comandix.Api.Controllers;
 
-[ApiController]
 [Route("api/comandas")]
 public class ComandasController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<ComandaResumoResponse>>> Listar(
         [FromQuery] StatusComanda status = StatusComanda.Aberta,
         [FromQuery] Guid? mesaId = null,
@@ -33,13 +33,18 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> ObterPorId(Guid id)
     {
         var comanda = await ComandasCompletas().AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+
         return comanda is null ? NotFound() : Ok(comanda.ToResponse());
     }
 
     [HttpPost]
+    [ProducesResponseType<ComandaResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<ComandaResponse>> Abrir(AbrirComandaRequest request)
     {
         var mesa = await context.Mesas.FindAsync(request.MesaId);
@@ -66,6 +71,8 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost("{id:guid}/itens")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> AdicionarItem(
         Guid id,
         AdicionarItemRequest request
@@ -86,6 +93,8 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/itens/{itemId:guid}/cancelar")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> CancelarItem(Guid id, Guid itemId)
     {
         var comanda = await ObterComanda(id);
@@ -99,6 +108,8 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/itens/{itemId:guid}/avancar")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> AvancarItem(Guid id, Guid itemId)
     {
         var comanda = await ObterComanda(id);
@@ -112,6 +123,8 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPut("{id:guid}/itens/{itemId:guid}/pagantes")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> AtribuirItem(
         Guid id,
         Guid itemId,
@@ -129,6 +142,8 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPut("{id:guid}/pessoas")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> DefinirPessoas(
         Guid id,
         DefinirPessoasRequest request
@@ -145,6 +160,8 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/pessoas/{pessoaId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> RenomearPessoa(
         Guid id,
         Guid pessoaId,
@@ -162,6 +179,8 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/taxa-servico")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> DefinirTaxaServico(
         Guid id,
         TaxaServicoRequest request
@@ -178,6 +197,8 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost("{id:guid}/fechar")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> Fechar(Guid id)
     {
         var comanda = await ObterComanda(id);
@@ -191,6 +212,8 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost("{id:guid}/cancelar")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> Cancelar(Guid id)
     {
         var comanda = await ObterComanda(id);

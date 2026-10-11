@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comandix.Api.Controllers;
 
-[ApiController]
 [Route("api/funcionarios")]
 public class FuncionariosController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<FuncionarioResponse>>> Listar(
         [FromQuery] Cargo? cargo,
         [FromQuery] bool apenasAtivos = false
@@ -34,6 +34,8 @@ public class FuncionariosController(ComandixDbContext context) : ApiControllerBa
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<FuncionarioResponse>> ObterPorId(Guid id)
     {
         var funcionario = await context
@@ -46,6 +48,7 @@ public class FuncionariosController(ComandixDbContext context) : ApiControllerBa
     }
 
     [HttpPost]
+    [ProducesResponseType<FuncionarioResponse>(StatusCodes.Status201Created)]
     public async Task<ActionResult<FuncionarioResponse>> Criar(FuncionarioRequest request)
     {
         var funcionario = new Funcionario(request.Nome.Trim(), request.Cargo);
@@ -62,6 +65,8 @@ public class FuncionariosController(ComandixDbContext context) : ApiControllerBa
     }
 
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Atualizar(Guid id, FuncionarioRequest request)
     {
         var funcionario = await context.Funcionarios.FindAsync(id);
@@ -75,6 +80,8 @@ public class FuncionariosController(ComandixDbContext context) : ApiControllerBa
     }
 
     [HttpPatch("{id:guid}/ativar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Ativar(Guid id)
     {
         var funcionario = await context.Funcionarios.FindAsync(id);
@@ -88,6 +95,9 @@ public class FuncionariosController(ComandixDbContext context) : ApiControllerBa
     }
 
     [HttpPatch("{id:guid}/desativar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Desativar(Guid id)
     {
         var funcionario = await context.Funcionarios.FindAsync(id);

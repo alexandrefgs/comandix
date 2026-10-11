@@ -93,4 +93,54 @@ public class CadastrosEndpointsTests(ComandixApiFactory factory) : ApiTestBase(f
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
+
+    [Fact]
+    public async Task DesativarGarcom_ComComandaAberta_DeveRetornar409()
+    {
+        var garcom = await CriarGarcom();
+        await AbrirComanda((await CriarMesa()).Id, garcom.Id);
+
+        var response = await Client.PatchAsync($"api/funcionarios/{garcom.Id}/desativar", null);
+
+        var problema = await LerProblema(response, HttpStatusCode.Conflict);
+        Assert.Equal(
+            "O funcionário tem comandas abertas. Feche-as antes de desativá-lo.",
+            problema.Detail
+        );
+    }
+
+    [Fact]
+    public async Task DesativarMesa_Ocupada_DeveRetornar400()
+    {
+        var mesa = await CriarMesa();
+        await AbrirComanda(mesa.Id, (await CriarGarcom()).Id);
+
+        var response = await Client.PatchAsync($"api/mesas/{mesa.Id}/desativar", null);
+
+        var problema = await LerProblema(response, HttpStatusCode.BadRequest);
+        Assert.Equal("Não é possível desativar uma mesa ocupada.", problema.Detail);
+    }
+
+    [Fact]
+    public async Task RemoverMesa_ComComandasRegistradas_DeveRetornar409()
+    {
+        var mesa = await CriarMesa();
+        await AbrirComanda(mesa.Id, (await CriarGarcom()).Id);
+
+        var response = await Client.DeleteAsync($"api/mesas/{mesa.Id}");
+
+        var problema = await LerProblema(response, HttpStatusCode.Conflict);
+        Assert.Equal(
+            "A mesa já tem comandas registradas. Desative-a em vez de remover.",
+            problema.Detail
+        );
+    }
+
+    [Fact]
+    public async Task RelatorioTaxaServico_ComMesInvalido_DeveRetornar400()
+    {
+        var response = await Client.GetAsync("api/relatorios/taxa-servico?ano=2026&mes=13");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
 }

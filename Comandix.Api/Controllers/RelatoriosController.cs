@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Comandix.Api.Controllers;
 
-[ApiController]
 [Route("api/relatorios")]
 public class RelatoriosController(ComandixDbContext context) : ApiControllerBase
 {
@@ -16,6 +15,7 @@ public class RelatoriosController(ComandixDbContext context) : ApiControllerBase
     );
 
     [HttpGet("taxa-servico")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<RelatorioTaxaServicoResponse>> TaxaServico(
         [FromQuery, Range(2000, 2100, ErrorMessage = "Ano inválido.")] int ano,
         [FromQuery, Range(1, 12, ErrorMessage = "O mês deve estar entre 1 e 12.")] int mes,
