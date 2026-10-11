@@ -13,7 +13,8 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProdutoResponse>>> Listar(
         [FromQuery] Guid? categoriaId,
-        [FromQuery] bool apenasDisponiveis = false)
+        [FromQuery] bool apenasDisponiveis = false
+    )
     {
         var query = context.Produtos.AsNoTracking();
 
@@ -26,7 +27,15 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
         var produtos = await query
             .OrderBy(p => p.Categoria.Nome)
             .ThenBy(p => p.Nome)
-            .Select(p => new ProdutoResponse(p.Id, p.Nome, p.Descricao, p.Preco, p.Disponivel, p.CategoriaId, p.Categoria.Nome))
+            .Select(p => new ProdutoResponse(
+                p.Id,
+                p.Nome,
+                p.Descricao,
+                p.Preco,
+                p.Disponivel,
+                p.CategoriaId,
+                p.Categoria.Nome
+            ))
             .ToListAsync();
 
         return Ok(produtos);
@@ -45,7 +54,12 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
         if (!await context.Categorias.AnyAsync(c => c.Id == request.CategoriaId))
             return BadRequest(new { mensagem = "Categoria não encontrada." });
 
-        var produto = new Produto(request.Nome.Trim(), request.Descricao?.Trim(), request.Preco, request.CategoriaId);
+        var produto = new Produto(
+            request.Nome.Trim(),
+            request.Descricao?.Trim(),
+            request.Preco,
+            request.CategoriaId
+        );
         context.Produtos.Add(produto);
         await context.SaveChangesAsync();
 
@@ -57,12 +71,18 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
     public async Task<IActionResult> Atualizar(Guid id, ProdutoRequest request)
     {
         var produto = await context.Produtos.FindAsync(id);
-        if (produto is null) return NotFound();
+        if (produto is null)
+            return NotFound();
 
         if (!await context.Categorias.AnyAsync(c => c.Id == request.CategoriaId))
             return BadRequest(new { mensagem = "Categoria não encontrada." });
 
-        produto.Atualizar(request.Nome.Trim(), request.Descricao?.Trim(), request.Preco, request.CategoriaId);
+        produto.Atualizar(
+            request.Nome.Trim(),
+            request.Descricao?.Trim(),
+            request.Preco,
+            request.CategoriaId
+        );
         await context.SaveChangesAsync();
 
         return NoContent();
@@ -72,7 +92,8 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
     public async Task<IActionResult> MarcarDisponivel(Guid id)
     {
         var produto = await context.Produtos.FindAsync(id);
-        if (produto is null) return NotFound();
+        if (produto is null)
+            return NotFound();
 
         produto.MarcarDisponivel();
         await context.SaveChangesAsync();
@@ -84,7 +105,8 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
     public async Task<IActionResult> MarcarIndisponivel(Guid id)
     {
         var produto = await context.Produtos.FindAsync(id);
-        if (produto is null) return NotFound();
+        if (produto is null)
+            return NotFound();
 
         produto.MarcarIndisponivel();
         await context.SaveChangesAsync();
@@ -96,7 +118,16 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
     public async Task<IActionResult> Remover(Guid id)
     {
         var produto = await context.Produtos.FindAsync(id);
-        if (produto is null) return NotFound();
+        if (produto is null)
+            return NotFound();
+
+        if (await context.Set<ItemComanda>().AnyAsync(i => i.ProdutoId == id))
+            return Conflict(
+                new
+                {
+                    mensagem = "O produto já foi pedido em comandas. Marque-o como indisponível em vez de remover.",
+                }
+            );
 
         context.Produtos.Remove(produto);
         await context.SaveChangesAsync();
@@ -105,9 +136,17 @@ public class ProdutosController(ComandixDbContext context) : ControllerBase
     }
 
     private Task<ProdutoResponse?> BuscarResponse(Guid id) =>
-        context.Produtos
-            .AsNoTracking()
+        context
+            .Produtos.AsNoTracking()
             .Where(p => p.Id == id)
-            .Select(p => new ProdutoResponse(p.Id, p.Nome, p.Descricao, p.Preco, p.Disponivel, p.CategoriaId, p.Categoria.Nome))
+            .Select(p => new ProdutoResponse(
+                p.Id,
+                p.Nome,
+                p.Descricao,
+                p.Preco,
+                p.Disponivel,
+                p.CategoriaId,
+                p.Categoria.Nome
+            ))
             .FirstOrDefaultAsync();
 }
