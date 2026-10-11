@@ -1,5 +1,6 @@
 using Comandix.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Comandix.Infrastructure.Data.Converters;
 
 namespace Comandix.Infrastructure.Data;
 
@@ -25,5 +26,10 @@ public class ComandixDbContext : DbContext
             .Property(nameof(EntityBase.Id))
             .ValueGeneratedNever();
     }
+}
+protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+{
+    configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+    configurationBuilder.Properties<DateTime?>().HaveConversion<UtcDateTimeConverter>();
 }
 }
