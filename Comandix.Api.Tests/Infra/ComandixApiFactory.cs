@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Comandix.Api.Seed;
 
 namespace Comandix.Api.Tests.Infra;
 
@@ -35,6 +36,7 @@ public class ComandixApiFactory : WebApplicationFactory<Program>
 
         context.Database.EnsureDeleted();
         context.Database.Migrate();
+        GerenteInicialSeeder.ExecutarAsync(host.Services).GetAwaiter().GetResult();
 
         return host;
     }

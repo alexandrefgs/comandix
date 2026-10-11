@@ -4,11 +4,12 @@ using Comandix.Domain.Enums;
 using Comandix.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace Comandix.Api.Controllers;
 
 [Route("api/funcionarios")]
-public class FuncionariosController(ComandixDbContext context) : ApiControllerBase
+public class FuncionariosController(ComandixDbContext context,IPasswordHasher<Funcionario> hasher) : ApiControllerBase
 {
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -116,4 +117,24 @@ public class FuncionariosController(ComandixDbContext context) : ApiControllerBa
 
         return NoContent();
     }
+    [HttpPut("{id:guid}/credenciais")]
+[ProducesResponseType(StatusCodes.Status204NoContent)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+[ProducesResponseType(StatusCodes.Status409Conflict)]
+public async Task<IActionResult> DefinirCredenciais(Guid id, CredenciaisRequest request)
+{
+    var funcionario = await context.Funcionarios.FindAsync(id);
+    if (funcionario is null)
+        return NotFound();
+
+    var usuario = request.Usuario.Trim().ToLowerInvariant();
+
+    if (await context.Funcionarios.AnyAsync(f => f.Usuario == usuario && f.Id != id))
+        return Conflito("Já existe um funcionário com esse usuário.");
+
+    funcionario.DefinirCredenciais(usuario, hasher.HashPassword(funcionario, request.Senha));
+    await context.SaveChangesAsync();
+
+    return NoContent();
+}
 }
