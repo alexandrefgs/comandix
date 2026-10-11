@@ -20,8 +20,8 @@ public static class ComandaMappings
             comanda.Consumo,
             comanda.CalcularTaxaServico(),
             comanda.TotalComTaxa,
-            comanda.Itens
-                .OrderBy(i => i.CriadoEm)
+            comanda
+                .Itens.OrderBy(i => i.CriadoEm)
                 .Select(i => new ItemComandaResponse(
                     i.Id,
                     i.ProdutoId,
@@ -32,9 +32,18 @@ public static class ComandaMappings
                     i.Observacao,
                     i.Status,
                     i.CriadoEm,
-                    i.Pagantes.Select(p => p.Id))),
-            comanda.CalcularDivisao()
-                .Select(d => new DivisaoPessoaResponse(d.PessoaId, d.Nome, d.Consumo, d.TaxaServico, d.Total)));
+                    i.Pagantes.Select(p => p.Id)
+                )),
+            comanda
+                .CalcularDivisao()
+                .Select(d => new DivisaoPessoaResponse(
+                    d.PessoaId,
+                    d.Nome,
+                    d.Consumo,
+                    d.TaxaServico,
+                    d.Total
+                ))
+        );
 
     public static ComandaResumoResponse ToResumoResponse(this Comanda comanda) =>
         new(
@@ -46,5 +55,6 @@ public static class ComandaMappings
             comanda.FechadaEm,
             comanda.Consumo,
             comanda.CalcularTaxaServico(),
-            comanda.TotalComTaxa);
+            comanda.TotalComTaxa
+        );
 }

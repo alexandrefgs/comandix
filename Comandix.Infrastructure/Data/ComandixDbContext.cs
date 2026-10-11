@@ -1,6 +1,6 @@
 using Comandix.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Comandix.Infrastructure.Data.Converters;
+using Microsoft.EntityFrameworkCore;
 
 namespace Comandix.Infrastructure.Data;
 
@@ -16,20 +16,25 @@ public class ComandixDbContext : DbContext
     public DbSet<Funcionario> Funcionarios => Set<Funcionario>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
-    modelBuilder.ApplyConfigurationsFromAssembly(typeof(ComandixDbContext).Assembly);
-
-    foreach (var entityType in modelBuilder.Model.GetEntityTypes()
-        .Where(e => typeof(EntityBase).IsAssignableFrom(e.ClrType)))
     {
-        modelBuilder.Entity(entityType.ClrType)
-            .Property(nameof(EntityBase.Id))
-            .ValueGeneratedNever();
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ComandixDbContext).Assembly);
+
+        foreach (
+            var entityType in modelBuilder
+                .Model.GetEntityTypes()
+                .Where(e => typeof(EntityBase).IsAssignableFrom(e.ClrType))
+        )
+        {
+            modelBuilder
+                .Entity(entityType.ClrType)
+                .Property(nameof(EntityBase.Id))
+                .ValueGeneratedNever();
+        }
     }
-}
-protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-{
-    configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
-    configurationBuilder.Properties<DateTime?>().HaveConversion<UtcDateTimeConverter>();
-}
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateTime?>().HaveConversion<UtcDateTimeConverter>();
+    }
 }

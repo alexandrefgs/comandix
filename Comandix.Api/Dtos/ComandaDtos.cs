@@ -7,25 +7,25 @@ public record AbrirComandaRequest(Guid MesaId, Guid GarcomId);
 
 public record AdicionarItemRequest(
     Guid ProdutoId,
-
-    [Range(1, 100, ErrorMessage = "A quantidade deve estar entre 1 e 100.")]
-    int Quantidade,
-
+    [Range(1, 100, ErrorMessage = "A quantidade deve estar entre 1 e 100.")] int Quantidade,
     [MaxLength(250, ErrorMessage = "A observação deve ter no máximo 250 caracteres.")]
-    string? Observacao);
+        string? Observacao
+);
 
 public record DefinirPessoasRequest(
-    [Range(1, 50, ErrorMessage = "A quantidade de pessoas deve estar entre 1 e 50.")]
-    int Quantidade);
+    [Range(1, 50, ErrorMessage = "A quantidade de pessoas deve estar entre 1 e 50.")] int Quantidade
+);
 
 public record RenomearPessoaRequest(
     [Required(ErrorMessage = "O nome é obrigatório.")]
     [MaxLength(60, ErrorMessage = "O nome deve ter no máximo 60 caracteres.")]
-    string Nome);
+        string Nome
+);
 
 public record AtribuirItemRequest(
     [Required(ErrorMessage = "Informe a lista de pessoas (vazia para dividir entre todos).")]
-    List<Guid> PessoaIds);
+        List<Guid> PessoaIds
+);
 
 public record TaxaServicoRequest(bool Cobrar);
 
@@ -39,14 +39,16 @@ public record ItemComandaResponse(
     string? Observacao,
     StatusItem Status,
     DateTime PedidoEm,
-    IEnumerable<Guid> PagantesIds);
+    IEnumerable<Guid> PagantesIds
+);
 
 public record DivisaoPessoaResponse(
     Guid PessoaId,
     string Nome,
     decimal Consumo,
     decimal TaxaServico,
-    decimal Total);
+    decimal Total
+);
 
 public record ComandaResponse(
     Guid Id,
@@ -63,7 +65,8 @@ public record ComandaResponse(
     decimal TaxaServico,
     decimal Total,
     IEnumerable<ItemComandaResponse> Itens,
-    IEnumerable<DivisaoPessoaResponse> Divisao);
+    IEnumerable<DivisaoPessoaResponse> Divisao
+);
 
 public record ComandaResumoResponse(
     Guid Id,
@@ -74,4 +77,5 @@ public record ComandaResumoResponse(
     DateTime? FechadaEm,
     decimal Consumo,
     decimal TaxaServico,
-    decimal Total);
+    decimal Total
+);

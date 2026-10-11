@@ -97,12 +97,15 @@ public class ComandaTests
         var divisao = comanda.CalcularDivisao();
 
         Assert.Equal(3, divisao.Count);
-        Assert.All(divisao, d =>
-        {
-            Assert.Equal(24m, d.Consumo);
-            Assert.Equal(2.40m, d.TaxaServico);
-            Assert.Equal(26.40m, d.Total);
-        });
+        Assert.All(
+            divisao,
+            d =>
+            {
+                Assert.Equal(24m, d.Consumo);
+                Assert.Equal(2.40m, d.TaxaServico);
+                Assert.Equal(26.40m, d.Total);
+            }
+        );
         Assert.Equal(79.20m, comanda.TotalComTaxa);
     }
 
@@ -225,7 +228,9 @@ public class ComandaTests
         comanda.Fechar();
 
         Assert.Throws<DomainException>(() => comanda.DefinirCobrancaTaxaServico(false));
-        Assert.Throws<DomainException>(() => comanda.AdicionarItem(NovoProduto("Cerveja", 12m), 1, null));
+        Assert.Throws<DomainException>(() =>
+            comanda.AdicionarItem(NovoProduto("Cerveja", 12m), 1, null)
+        );
         Assert.Throws<DomainException>(() => comanda.DefinirQuantidadePessoas(2));
     }
 

@@ -10,4 +10,5 @@ public record FilaCozinhaItemResponse(
     int Quantidade,
     string? Observacao,
     StatusItem Status,
-    DateTime PedidoEm);
+    DateTime PedidoEm
+);
