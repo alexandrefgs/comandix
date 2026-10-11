@@ -9,6 +9,9 @@ public class ComandixDbContext : DbContext
 
     public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<Produto> Produtos => Set<Produto>();
+    public DbSet<Mesa> Mesas => Set<Mesa>();
+    public DbSet<Comanda> Comandas => Set<Comanda>();
+    public DbSet<Funcionario> Funcionarios => Set<Funcionario>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

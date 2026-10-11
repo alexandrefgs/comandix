@@ -47,6 +47,181 @@ namespace Comandix.Infrastructure.Migrations
                     b.ToTable("Categorias", (string)null);
                 });
 
+            modelBuilder.Entity("Comandix.Domain.Entities.Comanda", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("CobrarTaxaServico")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechadaEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("GarcomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MesaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("PercentualTaxaServico")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("ValorTaxaServico")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MesaId")
+                        .IsUnique()
+                        .HasFilter("[Status] = 'Aberta'");
+
+                    b.HasIndex("GarcomId", "FechadaEm");
+
+                    b.ToTable("Comandas", (string)null);
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.Funcionario", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Cargo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Funcionarios", (string)null);
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.ItemComanda", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ComandaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NomeProduto")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Observacao")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<decimal>("PrecoUnitario")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<Guid>("ProdutoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantidade")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComandaId");
+
+                    b.HasIndex("ProdutoId");
+
+                    b.ToTable("ItensComanda", (string)null);
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.Mesa", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Ativa")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Capacidade")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Numero")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Numero")
+                        .IsUnique();
+
+                    b.ToTable("Mesas", (string)null);
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.PessoaComanda", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ComandaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<int>("Ordem")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComandaId");
+
+                    b.ToTable("PessoasComanda", (string)null);
+                });
+
             modelBuilder.Entity("Comandix.Domain.Entities.Produto", b =>
                 {
                     b.Property<Guid>("Id")
@@ -82,6 +257,66 @@ namespace Comandix.Infrastructure.Migrations
                     b.ToTable("Produtos", (string)null);
                 });
 
+            modelBuilder.Entity("ItensComandaPagantes", b =>
+                {
+                    b.Property<Guid>("ItemComandaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PessoaComandaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ItemComandaId", "PessoaComandaId");
+
+                    b.HasIndex("PessoaComandaId");
+
+                    b.ToTable("ItensComandaPagantes");
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.Comanda", b =>
+                {
+                    b.HasOne("Comandix.Domain.Entities.Funcionario", "Garcom")
+                        .WithMany()
+                        .HasForeignKey("GarcomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Comandix.Domain.Entities.Mesa", "Mesa")
+                        .WithMany()
+                        .HasForeignKey("MesaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Garcom");
+
+                    b.Navigation("Mesa");
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.ItemComanda", b =>
+                {
+                    b.HasOne("Comandix.Domain.Entities.Comanda", null)
+                        .WithMany("Itens")
+                        .HasForeignKey("ComandaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Comandix.Domain.Entities.Produto", "Produto")
+                        .WithMany()
+                        .HasForeignKey("ProdutoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Produto");
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.PessoaComanda", b =>
+                {
+                    b.HasOne("Comandix.Domain.Entities.Comanda", null)
+                        .WithMany("Pessoas")
+                        .HasForeignKey("ComandaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Comandix.Domain.Entities.Produto", b =>
                 {
                     b.HasOne("Comandix.Domain.Entities.Categoria", "Categoria")
@@ -93,9 +328,31 @@ namespace Comandix.Infrastructure.Migrations
                     b.Navigation("Categoria");
                 });
 
+            modelBuilder.Entity("ItensComandaPagantes", b =>
+                {
+                    b.HasOne("Comandix.Domain.Entities.ItemComanda", null)
+                        .WithMany()
+                        .HasForeignKey("ItemComandaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Comandix.Domain.Entities.PessoaComanda", null)
+                        .WithMany()
+                        .HasForeignKey("PessoaComandaId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Comandix.Domain.Entities.Categoria", b =>
                 {
                     b.Navigation("Produtos");
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.Comanda", b =>
+                {
+                    b.Navigation("Itens");
+
+                    b.Navigation("Pessoas");
                 });
 #pragma warning restore 612, 618
         }
