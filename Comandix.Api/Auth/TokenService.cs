@@ -1,5 +1,6 @@
 using Comandix.Api.Dtos;
 using Comandix.Domain.Entities;
+using Comandix.Domain.Enums;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +12,10 @@ public class TokenService(IOptions<JwtOptions> options)
     private readonly JwtOptions _jwt = options.Value;
     private readonly JsonWebTokenHandler _handler = new();
 
-    public LoginResponse Gerar(Funcionario funcionario)
+    public LoginResponse Gerar(Funcionario funcionario) =>
+        Gerar(funcionario.Id, funcionario.Nome, funcionario.Cargo);
+
+    public LoginResponse Gerar(Guid funcionarioId, string nome, Cargo cargo)
     {
         var expiraEm = DateTime.UtcNow.AddHours(_jwt.ExpiracaoHoras);
 
@@ -23,9 +27,9 @@ public class TokenService(IOptions<JwtOptions> options)
                 Expires = expiraEm,
                 Claims = new Dictionary<string, object>
                 {
-                    [JwtRegisteredClaimNames.Sub] = funcionario.Id.ToString(),
-                    [JwtRegisteredClaimNames.Name] = funcionario.Nome,
-                    ["role"] = funcionario.Cargo.ToString(),
+                    [JwtRegisteredClaimNames.Sub] = funcionarioId.ToString(),
+                    [JwtRegisteredClaimNames.Name] = nome,
+                    ["role"] = cargo.ToString(),
                 },
                 SigningCredentials = new SigningCredentials(
                     _jwt.ObterChaveAssinatura(),
@@ -34,6 +38,6 @@ public class TokenService(IOptions<JwtOptions> options)
             }
         );
 
-        return new LoginResponse(token, expiraEm, funcionario.Id, funcionario.Nome, funcionario.Cargo);
+        return new LoginResponse(token, expiraEm, funcionarioId, nome, cargo);
     }
 }

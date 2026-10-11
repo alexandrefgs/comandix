@@ -1,8 +1,10 @@
+using Comandix.Api.Auth;
 using Comandix.Api.Dtos;
 using Comandix.Api.Mappings;
 using Comandix.Domain.Entities;
 using Comandix.Domain.Enums;
 using Comandix.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,15 +45,20 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = Perfis.Salao)]
     [ProducesResponseType<ComandaResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<ComandaResponse>> Abrir(AbrirComandaRequest request)
     {
+        var garcomId = UsuarioEhGarcom ? FuncionarioLogadoId : request.GarcomId;
+        if (garcomId is null)
+            return RequisicaoInvalida("Informe o garçom responsável pela comanda.");
+
         var mesa = await context.Mesas.FindAsync(request.MesaId);
         if (mesa is null)
             return RequisicaoInvalida("Mesa não encontrada.");
 
-        var garcom = await context.Funcionarios.FindAsync(request.GarcomId);
+        var garcom = await context.Funcionarios.FindAsync(garcomId.Value);
         if (garcom is null)
             return RequisicaoInvalida("Garçom não encontrado.");
 
@@ -71,6 +78,7 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost("{id:guid}/itens")]
+    [Authorize(Roles = Perfis.Salao)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> AdicionarItem(
@@ -93,6 +101,7 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/itens/{itemId:guid}/cancelar")]
+    [Authorize(Roles = Perfis.Salao)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> CancelarItem(Guid id, Guid itemId)
@@ -108,6 +117,7 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/itens/{itemId:guid}/avancar")]
+    [Authorize(Roles = Perfis.Preparo)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> AvancarItem(Guid id, Guid itemId)
@@ -123,6 +133,7 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPut("{id:guid}/itens/{itemId:guid}/pagantes")]
+    [Authorize(Roles = Perfis.Salao)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> AtribuirItem(
@@ -142,6 +153,7 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPut("{id:guid}/pessoas")]
+    [Authorize(Roles = Perfis.Salao)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> DefinirPessoas(
@@ -160,6 +172,7 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/pessoas/{pessoaId:guid}")]
+    [Authorize(Roles = Perfis.Salao)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> RenomearPessoa(
@@ -179,6 +192,7 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/taxa-servico")]
+    [Authorize(Roles = Perfis.Salao)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> DefinirTaxaServico(
@@ -197,6 +211,7 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost("{id:guid}/fechar")]
+    [Authorize(Roles = Perfis.Fechamento)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> Fechar(Guid id)
@@ -212,6 +227,7 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost("{id:guid}/cancelar")]
+    [Authorize(Roles = Perfis.Fechamento)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ComandaResponse>> Cancelar(Guid id)

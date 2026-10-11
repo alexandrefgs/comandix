@@ -1,14 +1,17 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Comandix.Api.Auth;
 using Comandix.Api.Dtos;
 using Comandix.Domain.Enums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Comandix.Api.Tests.Infra;
 
 [Collection(ApiCollection.Nome)]
-public abstract class ApiTestBase(ComandixApiFactory factory)
+public abstract class ApiTestBase
 {
     private static int _proximoNumeroMesa = 100;
 
@@ -17,7 +20,24 @@ public abstract class ApiTestBase(ComandixApiFactory factory)
         Converters = { new JsonStringEnumConverter() },
     };
 
-    protected HttpClient Client { get; } = factory.CreateClient();
+    protected ComandixApiFactory Factory { get; }
+    protected HttpClient Client { get; }
+
+    protected ApiTestBase(ComandixApiFactory factory)
+    {
+        Factory = factory;
+        Client = factory.CreateClient();
+        AutenticarComo(Guid.NewGuid(), "Gerente Teste", Cargo.Gerente);
+    }
+
+    protected void AutenticarComo(FuncionarioResponse funcionario) =>
+        AutenticarComo(funcionario.Id, funcionario.Nome, funcionario.Cargo);
+
+    protected void AutenticarComo(Guid id, string nome, Cargo cargo)
+    {
+        var token = Factory.Services.GetRequiredService<TokenService>().Gerar(id, nome, cargo).Token;
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    }
 
     protected Task<HttpResponseMessage> EnviarPost(string url, object? body = null) =>
         body is null ? Client.PostAsync(url, null) : Client.PostAsJsonAsync(url, body, Json);
@@ -64,10 +84,12 @@ public abstract class ApiTestBase(ComandixApiFactory factory)
             new MesaRequest(Interlocked.Increment(ref _proximoNumeroMesa), 4)
         );
 
-    protected Task<FuncionarioResponse> CriarGarcom() =>
+    protected Task<FuncionarioResponse> CriarGarcom() => CriarFuncionario(Cargo.Garcom);
+
+    protected Task<FuncionarioResponse> CriarFuncionario(Cargo cargo) =>
         PostAsync<FuncionarioResponse>(
             "api/funcionarios",
-            new FuncionarioRequest("Garçom Teste", Cargo.Garcom)
+            new FuncionarioRequest($"{cargo} Teste", cargo)
         );
 
     protected Task<ComandaResponse> AbrirComanda(Guid mesaId, Guid garcomId) =>

@@ -1,15 +1,20 @@
+using Comandix.Api.Auth;
 using Comandix.Api.Dtos;
 using Comandix.Domain.Entities;
 using Comandix.Domain.Enums;
 using Comandix.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 
 namespace Comandix.Api.Controllers;
 
 [Route("api/funcionarios")]
-public class FuncionariosController(ComandixDbContext context,IPasswordHasher<Funcionario> hasher) : ApiControllerBase
+public class FuncionariosController(
+    ComandixDbContext context,
+    IPasswordHasher<Funcionario> hasher
+) : ApiControllerBase
 {
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -49,6 +54,7 @@ public class FuncionariosController(ComandixDbContext context,IPasswordHasher<Fu
     }
 
     [HttpPost]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType<FuncionarioResponse>(StatusCodes.Status201Created)]
     public async Task<ActionResult<FuncionarioResponse>> Criar(FuncionarioRequest request)
     {
@@ -66,6 +72,7 @@ public class FuncionariosController(ComandixDbContext context,IPasswordHasher<Fu
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Atualizar(Guid id, FuncionarioRequest request)
@@ -81,6 +88,7 @@ public class FuncionariosController(ComandixDbContext context,IPasswordHasher<Fu
     }
 
     [HttpPatch("{id:guid}/ativar")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Ativar(Guid id)
@@ -96,6 +104,7 @@ public class FuncionariosController(ComandixDbContext context,IPasswordHasher<Fu
     }
 
     [HttpPatch("{id:guid}/desativar")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -117,24 +126,26 @@ public class FuncionariosController(ComandixDbContext context,IPasswordHasher<Fu
 
         return NoContent();
     }
+
     [HttpPut("{id:guid}/credenciais")]
-[ProducesResponseType(StatusCodes.Status204NoContent)]
-[ProducesResponseType(StatusCodes.Status404NotFound)]
-[ProducesResponseType(StatusCodes.Status409Conflict)]
-public async Task<IActionResult> DefinirCredenciais(Guid id, CredenciaisRequest request)
-{
-    var funcionario = await context.Funcionarios.FindAsync(id);
-    if (funcionario is null)
-        return NotFound();
+    [Authorize(Roles = Perfis.Gerente)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> DefinirCredenciais(Guid id, CredenciaisRequest request)
+    {
+        var funcionario = await context.Funcionarios.FindAsync(id);
+        if (funcionario is null)
+            return NotFound();
 
-    var usuario = request.Usuario.Trim().ToLowerInvariant();
+        var usuario = request.Usuario.Trim().ToLowerInvariant();
 
-    if (await context.Funcionarios.AnyAsync(f => f.Usuario == usuario && f.Id != id))
-        return Conflito("Já existe um funcionário com esse usuário.");
+        if (await context.Funcionarios.AnyAsync(f => f.Usuario == usuario && f.Id != id))
+            return Conflito("Já existe um funcionário com esse usuário.");
 
-    funcionario.DefinirCredenciais(usuario, hasher.HashPassword(funcionario, request.Senha));
-    await context.SaveChangesAsync();
+        funcionario.DefinirCredenciais(usuario, hasher.HashPassword(funcionario, request.Senha));
+        await context.SaveChangesAsync();
 
-    return NoContent();
-}
+        return NoContent();
+    }
 }

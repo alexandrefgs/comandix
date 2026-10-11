@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Comandix.Api.Auth;
 using Comandix.Api.Dtos;
 using Comandix.Domain.Enums;
 using Comandix.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +17,7 @@ public class RelatoriosController(ComandixDbContext context) : ApiControllerBase
     );
 
     [HttpGet("taxa-servico")]
+    [Authorize(Roles = Perfis.Salao)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<RelatorioTaxaServicoResponse>> TaxaServico(
         [FromQuery, Range(2000, 2100, ErrorMessage = "Ano inválido.")] int ano,
@@ -22,6 +25,9 @@ public class RelatoriosController(ComandixDbContext context) : ApiControllerBase
         [FromQuery] Guid? garcomId = null
     )
     {
+        if (UsuarioEhGarcom)
+            garcomId = FuncionarioLogadoId;
+
         var inicioLocal = new DateTime(ano, mes, 1);
         var inicio = TimeZoneInfo.ConvertTimeToUtc(inicioLocal, FusoBrasilia);
         var fim = TimeZoneInfo.ConvertTimeToUtc(inicioLocal.AddMonths(1), FusoBrasilia);

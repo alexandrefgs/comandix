@@ -1,6 +1,8 @@
+using Comandix.Api.Auth;
 using Comandix.Api.Dtos;
 using Comandix.Domain.Entities;
 using Comandix.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -51,6 +53,7 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType<ProdutoResponse>(StatusCodes.Status201Created)]
     public async Task<ActionResult<ProdutoResponse>> Criar(ProdutoRequest request)
     {
@@ -71,6 +74,7 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Atualizar(Guid id, ProdutoRequest request)
@@ -94,6 +98,7 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/disponivel")]
+    [Authorize(Roles = Perfis.Preparo)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> MarcarDisponivel(Guid id)
@@ -109,6 +114,7 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/indisponivel")]
+    [Authorize(Roles = Perfis.Preparo)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> MarcarIndisponivel(Guid id)
@@ -124,6 +130,7 @@ public class ProdutosController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]

@@ -3,7 +3,7 @@ using Comandix.Domain.Enums;
 
 namespace Comandix.Api.Dtos;
 
-public record AbrirComandaRequest(Guid MesaId, Guid GarcomId);
+public record AbrirComandaRequest(Guid MesaId, Guid? GarcomId = null);
 
 public record AdicionarItemRequest(
     Guid ProdutoId,

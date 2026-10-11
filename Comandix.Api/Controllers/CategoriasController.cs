@@ -1,6 +1,8 @@
+using Comandix.Api.Auth;
 using Comandix.Api.Dtos;
 using Comandix.Domain.Entities;
 using Comandix.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,6 +39,7 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType<CategoriaResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<CategoriaResponse>> Criar(CategoriaRequest request)
@@ -55,6 +58,7 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -76,6 +80,7 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/ativar")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Ativar(Guid id)
@@ -91,6 +96,7 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/desativar")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desativar(Guid id)
@@ -106,6 +112,7 @@ public class CategoriasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]

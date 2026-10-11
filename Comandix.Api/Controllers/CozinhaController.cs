@@ -1,6 +1,8 @@
+using Comandix.Api.Auth;
 using Comandix.Api.Dtos;
 using Comandix.Domain.Enums;
 using Comandix.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +12,7 @@ namespace Comandix.Api.Controllers;
 public class CozinhaController(ComandixDbContext context) : ApiControllerBase
 {
     [HttpGet("fila")]
+    [Authorize(Roles = Perfis.Preparo)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<FilaCozinhaItemResponse>>> Fila()
     {

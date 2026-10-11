@@ -1,7 +1,9 @@
+using Comandix.Api.Auth;
 using Comandix.Api.Dtos;
 using Comandix.Domain.Entities;
 using Comandix.Domain.Enums;
 using Comandix.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -48,6 +50,7 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType<MesaResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<MesaResponse>> Criar(MesaRequest request)
@@ -70,6 +73,7 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -89,6 +93,7 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/ativar")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Ativar(Guid id)
@@ -104,6 +109,7 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPatch("{id:guid}/desativar")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desativar(Guid id)
@@ -119,6 +125,7 @@ public class MesasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = Perfis.Gerente)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
