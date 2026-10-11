@@ -10,4 +10,5 @@ public static class Perfis
     public const string Salao = $"{Gerente},{Garcom}";
     public const string Preparo = $"{Gerente},{Garcom},{Cozinha}";
     public const string Fechamento = $"{Gerente},{Garcom},{Caixa}";
+    public const string Financeiro = $"{Gerente},{Caixa}";
 }

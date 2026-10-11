@@ -94,6 +94,18 @@ public abstract class ApiTestBase
 
     protected Task<ComandaResponse> AbrirComanda(Guid mesaId, Guid garcomId) =>
         PostAsync<ComandaResponse>("api/comandas", new AbrirComandaRequest(mesaId, garcomId));
+    
+    protected async Task<CaixaResponse> AbrirNovoCaixa(decimal valorAbertura = 100m)
+{
+    var atual = await Client.GetAsync("api/caixas/atual");
+    if (atual.IsSuccessStatusCode)
+    {
+        var caixa = (await atual.Content.ReadFromJsonAsync<CaixaResponse>(Json))!;
+        await PostAsync<CaixaResponse>($"api/caixas/{caixa.Id}/fechar", new FecharCaixaRequest(0m));
+    }
+
+    return await PostAsync<CaixaResponse>("api/caixas", new AbrirCaixaRequest(valorAbertura));
+}
 
     private static async Task<T> Ler<T>(HttpResponseMessage response)
     {
