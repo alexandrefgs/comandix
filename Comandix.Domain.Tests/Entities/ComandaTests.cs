@@ -213,6 +213,7 @@ public class ComandaTests
         var comanda = new Comanda(mesa, NovoGarcom());
         var item = comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
         Entregar(comanda, item);
+        Pagar(comanda);
 
         comanda.Fechar();
 
@@ -223,11 +224,39 @@ public class ComandaTests
     }
 
     [Fact]
+    public void Fechar_ComSaldoPendente_DeveLancarExcecao()
+    {
+        var comanda = NovaComanda();
+        var item = comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
+        Entregar(comanda, item);
+        comanda.RegistrarPagamento(CaixaId, FormaPagamento.Pix, 30m, null, null, OperadorId);
+
+        var excecao = Assert.Throws<DomainException>(comanda.Fechar);
+
+        Assert.Equal("A comanda ainda possui saldo a pagar.", excecao.Message);
+    }
+
+    [Fact]
+    public void Fechar_ComPagamentoExcedente_DeveLancarExcecao()
+    {
+        var comanda = NovaComanda();
+        var item = comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
+        Entregar(comanda, item);
+        Pagar(comanda);
+
+        comanda.DefinirCobrancaTaxaServico(false);
+
+        Assert.Equal(-6m, comanda.Saldo);
+        Assert.Throws<DomainException>(comanda.Fechar);
+    }
+
+    [Fact]
     public void ComandaFechada_NaoPodeSerAlterada()
     {
         var comanda = NovaComanda();
         var item = comanda.AdicionarItem(NovoProduto("Pizza", 60m), 1, null);
         Entregar(comanda, item);
+        Pagar(comanda);
         comanda.Fechar();
 
         Assert.Throws<DomainException>(() => comanda.DefinirCobrancaTaxaServico(false));
@@ -399,4 +428,14 @@ public class ComandaTests
         for (var i = 0; i < 3; i++)
             comanda.AvancarStatusItem(item.Id);
     }
+
+    private static void Pagar(Comanda comanda) =>
+        comanda.RegistrarPagamento(
+            CaixaId,
+            FormaPagamento.Pix,
+            comanda.Saldo,
+            null,
+            null,
+            OperadorId
+        );
 }

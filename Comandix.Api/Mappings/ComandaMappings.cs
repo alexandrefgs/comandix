@@ -5,8 +5,11 @@ namespace Comandix.Api.Mappings;
 
 public static class ComandaMappings
 {
-    public static ComandaResponse ToResponse(this Comanda comanda) =>
-        new(
+    public static ComandaResponse ToResponse(this Comanda comanda)
+    {
+        var pagamentosAtivos = comanda.Pagamentos.Where(p => !p.Estornado).ToList();
+
+        return new ComandaResponse(
             comanda.Id,
             comanda.MesaId,
             comanda.Mesa.Numero,
@@ -20,6 +23,8 @@ public static class ComandaMappings
             comanda.Consumo,
             comanda.CalcularTaxaServico(),
             comanda.TotalComTaxa,
+            comanda.TotalPago,
+            comanda.Saldo,
             comanda
                 .Itens.OrderBy(i => i.CriadoEm)
                 .Select(i => new ItemComandaResponse(
@@ -36,14 +41,38 @@ public static class ComandaMappings
                 )),
             comanda
                 .CalcularDivisao()
-                .Select(d => new DivisaoPessoaResponse(
-                    d.PessoaId,
-                    d.Nome,
-                    d.Consumo,
-                    d.TaxaServico,
-                    d.Total
+                .Select(d =>
+                {
+                    var pago = pagamentosAtivos
+                        .Where(p => p.PessoaId == d.PessoaId)
+                        .Sum(p => p.Valor);
+
+                    return new DivisaoPessoaResponse(
+                        d.PessoaId,
+                        d.Nome,
+                        d.Consumo,
+                        d.TaxaServico,
+                        d.Total,
+                        pago,
+                        d.Total - pago
+                    );
+                }),
+            comanda
+                .Pagamentos.OrderBy(p => p.CriadoEm)
+                .Select(p => new PagamentoResponse(
+                    p.Id,
+                    p.Forma,
+                    p.Valor,
+                    p.ValorRecebido,
+                    p.Troco,
+                    p.PessoaId,
+                    p.CaixaId,
+                    p.CriadoEm,
+                    p.Estornado,
+                    p.MotivoEstorno
                 ))
         );
+    }
 
     public static ComandaResumoResponse ToResumoResponse(this Comanda comanda) =>
         new(
@@ -55,6 +84,7 @@ public static class ComandaMappings
             comanda.FechadaEm,
             comanda.Consumo,
             comanda.CalcularTaxaServico(),
-            comanda.TotalComTaxa
+            comanda.TotalComTaxa,
+            comanda.Saldo
         );
 }

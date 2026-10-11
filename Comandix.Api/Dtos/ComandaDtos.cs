@@ -29,6 +29,21 @@ public record AtribuirItemRequest(
 
 public record TaxaServicoRequest(bool Cobrar);
 
+public record RegistrarPagamentoRequest(
+    [EnumDataType(typeof(FormaPagamento), ErrorMessage = "Forma de pagamento inválida.")]
+        FormaPagamento Forma,
+    [Range(0.01, 100000, ErrorMessage = "O valor deve estar entre 0,01 e 100.000.")] decimal Valor,
+    [Range(0.01, 100000, ErrorMessage = "O valor recebido deve estar entre 0,01 e 100.000.")]
+        decimal? ValorRecebido = null,
+    Guid? PessoaId = null
+);
+
+public record EstornarPagamentoRequest(
+    [Required(ErrorMessage = "O motivo do estorno é obrigatório.")]
+    [MaxLength(200, ErrorMessage = "O motivo deve ter no máximo 200 caracteres.")]
+        string Motivo
+);
+
 public record ItemComandaResponse(
     Guid Id,
     Guid ProdutoId,
@@ -47,7 +62,22 @@ public record DivisaoPessoaResponse(
     string Nome,
     decimal Consumo,
     decimal TaxaServico,
-    decimal Total
+    decimal Total,
+    decimal Pago,
+    decimal Saldo
+);
+
+public record PagamentoResponse(
+    Guid Id,
+    FormaPagamento Forma,
+    decimal Valor,
+    decimal ValorRecebido,
+    decimal Troco,
+    Guid? PessoaId,
+    Guid CaixaId,
+    DateTime RegistradoEm,
+    bool Estornado,
+    string? MotivoEstorno
 );
 
 public record ComandaResponse(
@@ -64,8 +94,11 @@ public record ComandaResponse(
     decimal Consumo,
     decimal TaxaServico,
     decimal Total,
+    decimal TotalPago,
+    decimal Saldo,
     IEnumerable<ItemComandaResponse> Itens,
-    IEnumerable<DivisaoPessoaResponse> Divisao
+    IEnumerable<DivisaoPessoaResponse> Divisao,
+    IEnumerable<PagamentoResponse> Pagamentos
 );
 
 public record ComandaResumoResponse(
@@ -77,5 +110,6 @@ public record ComandaResumoResponse(
     DateTime? FechadaEm,
     decimal Consumo,
     decimal TaxaServico,
-    decimal Total
+    decimal Total,
+    decimal Saldo
 );

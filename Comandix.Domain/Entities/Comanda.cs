@@ -229,6 +229,13 @@ public class Comanda : EntityBase
 
         if (_itens.Any(i => i.Status is not (StatusItem.Entregue or StatusItem.Cancelado)))
             throw new DomainException("Ainda há itens que não foram entregues.");
+        if (Saldo > 0)
+            throw new DomainException("A comanda ainda possui saldo a pagar.");
+
+        if (Saldo < 0)
+            throw new DomainException(
+                "Os pagamentos excedem o total da comanda. Estorne o pagamento excedente."
+            );
 
         ValorTaxaServico = CalcularTaxaServico();
         Status = StatusComanda.Fechada;

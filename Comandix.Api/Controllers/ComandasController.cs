@@ -210,6 +210,73 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
         return Ok(comanda.ToResponse());
     }
 
+    [HttpPost("{id:guid}/pagamentos")]
+[Authorize(Roles = Perfis.Fechamento)]
+[ProducesResponseType(StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+public async Task<ActionResult<ComandaResponse>> RegistrarPagamento(
+    Guid id,
+    RegistrarPagamentoRequest request
+)
+{
+    var comanda = await ObterComanda(id);
+    if (comanda is null)
+        return NotFound();
+
+    var caixaId = await context
+        .Caixas.Where(c => c.Status == StatusCaixa.Aberto)
+        .Select(c => (Guid?)c.Id)
+        .FirstOrDefaultAsync();
+
+    if (caixaId is null)
+        return RequisicaoInvalida("Não há caixa aberto. Abra o caixa antes de registrar pagamentos.");
+
+    comanda.RegistrarPagamento(
+        caixaId.Value,
+        request.Forma,
+        request.Valor,
+        request.ValorRecebido,
+        request.PessoaId,
+        FuncionarioLogadoId
+    );
+    await context.SaveChangesAsync();
+
+    return Ok(comanda.ToResponse());
+}
+
+[HttpPost("{id:guid}/pagamentos/{pagamentoId:guid}/estornar")]
+[Authorize(Roles = Perfis.Financeiro)]
+[ProducesResponseType(StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+public async Task<ActionResult<ComandaResponse>> EstornarPagamento(
+    Guid id,
+    Guid pagamentoId,
+    EstornarPagamentoRequest request
+)
+{
+    var comanda = await ObterComanda(id);
+    if (comanda is null)
+        return NotFound();
+
+    var pagamento = comanda.Pagamentos.FirstOrDefault(p => p.Id == pagamentoId);
+    if (pagamento is null)
+        return NotFound();
+
+    if (
+        await context.Caixas.AnyAsync(c =>
+            c.Id == pagamento.CaixaId && c.Status == StatusCaixa.Fechado
+        )
+    )
+        return RequisicaoInvalida(
+            "O pagamento pertence a um caixa já fechado e não pode ser estornado."
+        );
+
+    comanda.EstornarPagamento(pagamentoId, request.Motivo, FuncionarioLogadoId);
+    await context.SaveChangesAsync();
+
+    return Ok(comanda.ToResponse());
+}
+
     [HttpPost("{id:guid}/fechar")]
     [Authorize(Roles = Perfis.Fechamento)]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -243,13 +310,14 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     private IQueryable<Comanda> ComandasCompletas() =>
-        context
-            .Comandas.Include(c => c.Mesa)
-            .Include(c => c.Garcom)
-            .Include(c => c.Pessoas)
-            .Include(c => c.Itens)
-                .ThenInclude(i => i.Pagantes)
-            .AsSplitQuery();
+    context
+        .Comandas.Include(c => c.Mesa)
+        .Include(c => c.Garcom)
+        .Include(c => c.Pessoas)
+        .Include(c => c.Pagamentos)
+        .Include(c => c.Itens)
+            .ThenInclude(i => i.Pagantes)
+        .AsSplitQuery();
 
     private Task<Comanda?> ObterComanda(Guid id) =>
         ComandasCompletas().FirstOrDefaultAsync(c => c.Id == id);
