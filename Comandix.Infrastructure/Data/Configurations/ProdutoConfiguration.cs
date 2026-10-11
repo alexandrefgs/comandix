@@ -11,17 +11,14 @@ public class ProdutoConfiguration : IEntityTypeConfiguration<Produto>
         builder.ToTable("Produtos");
         builder.HasKey(p => p.Id);
 
-        builder.Property(p => p.Nome)
-            .IsRequired()
-            .HasMaxLength(150);
+        builder.Property(p => p.Nome).IsRequired().HasMaxLength(150);
 
-        builder.Property(p => p.Descricao)
-            .HasMaxLength(500);
+        builder.Property(p => p.Descricao).HasMaxLength(500);
 
-        builder.Property(p => p.Preco)
-            .HasPrecision(10, 2);
+        builder.Property(p => p.Preco).HasPrecision(10, 2);
 
-        builder.HasOne(p => p.Categoria)
+        builder
+            .HasOne(p => p.Categoria)
             .WithMany(c => c.Produtos)
             .HasForeignKey(p => p.CategoriaId)
             .OnDelete(DeleteBehavior.Restrict);

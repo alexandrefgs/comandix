@@ -11,31 +11,34 @@ public class ComandaConfiguration : IEntityTypeConfiguration<Comanda>
         builder.ToTable("Comandas");
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.Status)
-            .HasConversion<string>()
-            .HasMaxLength(20);
+        builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
 
         builder.Property(c => c.PercentualTaxaServico).HasPrecision(5, 2);
         builder.Property(c => c.ValorTaxaServico).HasPrecision(10, 2);
 
         builder.Ignore(c => c.Consumo);
+        builder.Ignore(c => c.TotalComTaxa);
 
-        builder.HasOne(c => c.Mesa)
+        builder
+            .HasOne(c => c.Mesa)
             .WithMany()
             .HasForeignKey(c => c.MesaId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(c => c.Garcom)
+        builder
+            .HasOne(c => c.Garcom)
             .WithMany()
             .HasForeignKey(c => c.GarcomId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(c => c.Itens)
+        builder
+            .HasMany(c => c.Itens)
             .WithOne()
             .HasForeignKey(i => i.ComandaId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(c => c.Pessoas)
+        builder
+            .HasMany(c => c.Pessoas)
             .WithOne()
             .HasForeignKey(p => p.ComandaId)
             .OnDelete(DeleteBehavior.Cascade);
@@ -43,9 +46,7 @@ public class ComandaConfiguration : IEntityTypeConfiguration<Comanda>
         builder.Navigation(c => c.Itens).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(c => c.Pessoas).UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.HasIndex(c => c.MesaId)
-            .IsUnique()
-            .HasFilter("[Status] = 'Aberta'");
+        builder.HasIndex(c => c.MesaId).IsUnique().HasFilter("[Status] = 'Aberta'");
 
         builder.HasIndex(c => new { c.GarcomId, c.FechadaEm });
     }

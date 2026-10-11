@@ -11,12 +11,8 @@ public class FuncionarioConfiguration : IEntityTypeConfiguration<Funcionario>
         builder.ToTable("Funcionarios");
         builder.HasKey(f => f.Id);
 
-        builder.Property(f => f.Nome)
-            .IsRequired()
-            .HasMaxLength(100);
+        builder.Property(f => f.Nome).IsRequired().HasMaxLength(100);
 
-        builder.Property(f => f.Cargo)
-            .HasConversion<string>()
-            .HasMaxLength(20);
+        builder.Property(f => f.Cargo).HasConversion<string>().HasMaxLength(20);
     }
 }

@@ -25,7 +25,6 @@ namespace Comandix.Infrastructure.Migrations
             modelBuilder.Entity("Comandix.Domain.Entities.Categoria", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("Ativa")
@@ -50,7 +49,6 @@ namespace Comandix.Infrastructure.Migrations
             modelBuilder.Entity("Comandix.Domain.Entities.Comanda", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("CobrarTaxaServico")
@@ -95,7 +93,6 @@ namespace Comandix.Infrastructure.Migrations
             modelBuilder.Entity("Comandix.Domain.Entities.Funcionario", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("Ativo")
@@ -122,7 +119,6 @@ namespace Comandix.Infrastructure.Migrations
             modelBuilder.Entity("Comandix.Domain.Entities.ItemComanda", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ComandaId")
@@ -167,7 +163,6 @@ namespace Comandix.Infrastructure.Migrations
             modelBuilder.Entity("Comandix.Domain.Entities.Mesa", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("Ativa")
@@ -198,7 +193,6 @@ namespace Comandix.Infrastructure.Migrations
             modelBuilder.Entity("Comandix.Domain.Entities.PessoaComanda", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ComandaId")
@@ -225,7 +219,6 @@ namespace Comandix.Infrastructure.Migrations
             modelBuilder.Entity("Comandix.Domain.Entities.Produto", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CategoriaId")

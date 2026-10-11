@@ -11,9 +11,7 @@ public class MesaConfiguration : IEntityTypeConfiguration<Mesa>
         builder.ToTable("Mesas");
         builder.HasKey(m => m.Id);
 
-        builder.Property(m => m.Status)
-            .HasConversion<string>()
-            .HasMaxLength(20);
+        builder.Property(m => m.Status).HasConversion<string>().HasMaxLength(20);
 
         builder.HasIndex(m => m.Numero).IsUnique();
     }

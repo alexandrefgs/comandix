@@ -11,8 +11,6 @@ public class PessoaComandaConfiguration : IEntityTypeConfiguration<PessoaComanda
         builder.ToTable("PessoasComanda");
         builder.HasKey(p => p.Id);
 
-        builder.Property(p => p.Nome)
-            .IsRequired()
-            .HasMaxLength(60);
+        builder.Property(p => p.Nome).IsRequired().HasMaxLength(60);
     }
 }

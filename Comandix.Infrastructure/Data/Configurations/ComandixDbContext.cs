@@ -5,7 +5,8 @@ namespace Comandix.Infrastructure.Data;
 
 public class ComandixDbContext : DbContext
 {
-    public ComandixDbContext(DbContextOptions<ComandixDbContext> options) : base(options) { }
+    public ComandixDbContext(DbContextOptions<ComandixDbContext> options)
+        : base(options) { }
 
     public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<Produto> Produtos => Set<Produto>();
@@ -14,7 +15,15 @@ public class ComandixDbContext : DbContext
     public DbSet<Funcionario> Funcionarios => Set<Funcionario>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    modelBuilder.ApplyConfigurationsFromAssembly(typeof(ComandixDbContext).Assembly);
+
+    foreach (var entityType in modelBuilder.Model.GetEntityTypes()
+        .Where(e => typeof(EntityBase).IsAssignableFrom(e.ClrType)))
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ComandixDbContext).Assembly);
+        modelBuilder.Entity(entityType.ClrType)
+            .Property(nameof(EntityBase.Id))
+            .ValueGeneratedNever();
     }
+}
 }
