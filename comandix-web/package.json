@@ -1,0 +1,52 @@
+{
+  "name": "comandix-web",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "serve:ssr:comandix-web": "node dist/comandix-web/server/server.mjs"
+  },
+  "private": true,
+  "packageManager": "npm@11.17.0",
+  "dependencies": {
+    "@angular/common": "^22.1.0",
+    "@angular/compiler": "^22.1.0",
+    "@angular/core": "^22.1.0",
+    "@angular/forms": "^22.1.0",
+    "@angular/platform-browser": "^22.1.0",
+    "@angular/platform-server": "^22.1.0",
+    "@angular/router": "^22.1.0",
+    "@angular/ssr": "^22.1.5",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@primeuix/themes": "^3.0.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "express": "^5.1.0",
+    "lucide-angular": "^1.0.0",
+    "postcss": "^8.5.29",
+    "primeng": "^22.1.2",
+    "rxjs": "~7.8.0",
+    "tailwindcss": "^4.3.3",
+    "tailwindcss-primeui": "^0.6.1",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.1.5",
+    "@angular/cli": "^22.1.5",
+    "@angular/compiler-cli": "^22.1.0",
+    "@types/express": "^5.0.1",
+    "@types/node": "^20.17.19",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "~6.0.2",
+    "vitest": "^4.0.8"
+  },
+  "overrides": {
+    "lucide-angular": {
+      "@angular/common": "$@angular/common",
+      "@angular/core": "$@angular/core"
+    }
+  }
+}

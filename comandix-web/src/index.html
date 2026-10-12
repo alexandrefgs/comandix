@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Comandix</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Comandix: sistema de comandas para restaurantes, com divisão de conta, cozinha, caixa e cardápio digital."
+    />
+    <meta name="theme-color" content="#0e7490" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <script>
+      (function () {
+        try {
+          var tema = localStorage.getItem('comandix-tema') || 'sistema';
+          var escuro =
+            tema === 'escuro' ||
+            (tema === 'sistema' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (escuro) document.documentElement.classList.add('app-dark');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>
