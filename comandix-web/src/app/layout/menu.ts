@@ -2,6 +2,7 @@ import { Type } from '@angular/core';
 import {
   BookOpen,
   ChefHat,
+  Coins,
   Gauge,
   LayoutGrid,
   LucideIconData,
@@ -41,7 +42,7 @@ export const ITENS_MENU: ItemMenu[] = [
     rotulo: 'Cozinha',
     caminho: 'cozinha',
     icone: ChefHat,
-    cargos: ['Gerente', 'Garcom', 'Cozinha'],
+    cargos: ['Gerente', 'Cozinha'],
     carregar: emBreve,
   },
   {
@@ -56,7 +57,7 @@ export const ITENS_MENU: ItemMenu[] = [
     caminho: 'cardapio',
     icone: BookOpen,
     cargos: ['Gerente'],
-    carregar: emBreve,
+    carregar: () => import('../paginas/cardapio/cardapio').then((m) => m.Cardapio),
   },
   {
     rotulo: 'Funcionários',
@@ -69,7 +70,14 @@ export const ITENS_MENU: ItemMenu[] = [
     rotulo: 'Relatórios',
     caminho: 'relatorios',
     icone: TrendingUp,
-    cargos: ['Gerente', 'Garcom'],
+    cargos: ['Gerente'],
+    carregar: emBreve,
+  },
+  {
+    rotulo: 'Minha taxa',
+    caminho: 'minha-taxa',
+    icone: Coins,
+    cargos: ['Garcom'],
     carregar: emBreve,
   },
 ];

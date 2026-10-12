@@ -8,14 +8,26 @@ import { ROTULO_CARGO } from '../auth/rotas-por-cargo';
 import { definirIndexacao } from '../seo/indexacao';
 import { SeletorTema } from '../tema/seletor-tema';
 import { ITENS_MENU } from './menu';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
 
 const CHAVE_RECOLHIDO = 'comandix-menu-recolhido';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule, SeletorTema],
+    imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    LucideAngularModule,
+    SeletorTema,
+    ToastModule,
+    ConfirmDialogModule,
+  ],
   template: `
     <div class="flex h-dvh overflow-hidden">
+    <p-toast position="top-right" />
+    <p-confirmdialog [style]="{ width: '24rem' }" [breakpoints]="{ '640px': '90vw' }" />
       @if (menuMovelAberto()) {
         <div
           class="fixed inset-0 z-30 bg-slate-950/60 lg:hidden"
