@@ -118,3 +118,13 @@ public record ComandaResumoResponse(
     decimal Saldo,
     int ItensProntos
 );
+
+public record EventoComandaResponse(
+    Guid Id,
+    TipoEventoComanda Tipo,
+    string Descricao,
+    Guid FuncionarioId,
+    string Funcionario,
+    decimal? Valor,
+    DateTime OcorridoEm
+);

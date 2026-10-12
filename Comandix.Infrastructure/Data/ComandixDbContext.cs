@@ -16,6 +16,7 @@ public class ComandixDbContext : DbContext
     public DbSet<Funcionario> Funcionarios => Set<Funcionario>();
     public DbSet<Caixa> Caixas => Set<Caixa>();
     public DbSet<NotaFiscal> NotasFiscais => Set<NotaFiscal>();
+    public DbSet<EventoComanda> EventosComanda => Set<EventoComanda>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

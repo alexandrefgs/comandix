@@ -133,6 +133,46 @@ namespace Comandix.Infrastructure.Migrations
                     b.ToTable("Comandas", (string)null);
                 });
 
+            modelBuilder.Entity("Comandix.Domain.Entities.EventoComanda", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ComandaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("FuncionarioId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FuncionarioNome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal?>("Valor")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComandaId", "CriadoEm");
+
+                    b.ToTable("EventosComanda", (string)null);
+                });
+
             modelBuilder.Entity("Comandix.Domain.Entities.Funcionario", b =>
                 {
                     b.Property<Guid>("Id")
@@ -494,6 +534,15 @@ namespace Comandix.Infrastructure.Migrations
                     b.Navigation("Garcom");
 
                     b.Navigation("Mesa");
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.EventoComanda", b =>
+                {
+                    b.HasOne("Comandix.Domain.Entities.Comanda", null)
+                        .WithMany()
+                        .HasForeignKey("ComandaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Comandix.Domain.Entities.ItemComanda", b =>
