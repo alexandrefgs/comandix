@@ -1,5 +1,6 @@
 using Comandix.Api.Dtos;
 using Comandix.Domain.Entities;
+using Comandix.Domain.Enums;
 
 namespace Comandix.Api.Mappings;
 
@@ -75,16 +76,19 @@ public static class ComandaMappings
     }
 
     public static ComandaResumoResponse ToResumoResponse(this Comanda comanda) =>
-        new(
-            comanda.Id,
-            comanda.Mesa.Numero,
-            comanda.Garcom.Nome,
-            comanda.Status,
-            comanda.CriadoEm,
-            comanda.FechadaEm,
-            comanda.Consumo,
-            comanda.CalcularTaxaServico(),
-            comanda.TotalComTaxa,
-            comanda.Saldo
-        );
+    new(
+        comanda.Id,
+        comanda.MesaId,
+        comanda.Mesa.Numero,
+        comanda.GarcomId,
+        comanda.Garcom.Nome,
+        comanda.Status,
+        comanda.CriadoEm,
+        comanda.FechadaEm,
+        comanda.Consumo,
+        comanda.CalcularTaxaServico(),
+        comanda.TotalComTaxa,
+        comanda.Saldo,
+        comanda.Itens.Count(i => i.Status == StatusItem.Pronto)
+    );
 }

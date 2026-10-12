@@ -103,7 +103,9 @@ public record ComandaResponse(
 
 public record ComandaResumoResponse(
     Guid Id,
+    Guid MesaId,
     int MesaNumero,
+    Guid GarcomId,
     string Garcom,
     StatusComanda Status,
     DateTime AbertaEm,
@@ -111,5 +113,6 @@ public record ComandaResumoResponse(
     decimal Consumo,
     decimal TaxaServico,
     decimal Total,
-    decimal Saldo
+    decimal Saldo,
+    int ItensProntos
 );
