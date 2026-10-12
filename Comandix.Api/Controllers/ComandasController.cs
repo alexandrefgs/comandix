@@ -180,13 +180,19 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
 
         comanda.AvancarStatusItem(itemId);
         var item = comanda.Itens.Single(i => i.Id == itemId);
-        var (tipo, acao) = item.Status switch
+        var (tipo, descricao) = item.Status switch
         {
-            StatusItem.EmPreparo => (TipoEventoComanda.ItemEmPreparo, "Iniciou o preparo de"),
-            StatusItem.Pronto => (TipoEventoComanda.ItemPronto, "Marcou como pronto"),
-            _ => (TipoEventoComanda.ItemEntregue, "Entregou"),
+            StatusItem.EmPreparo => (
+                TipoEventoComanda.ItemEmPreparo,
+                $"Iniciou o preparo de {Descrever(item)}"
+            ),
+            StatusItem.Pronto => (
+                TipoEventoComanda.ItemPronto,
+                $"Marcou {Descrever(item)} como pronto"
+            ),
+            _ => (TipoEventoComanda.ItemEntregue, $"Entregou {Descrever(item)}"),
         };
-        Registrar(comanda, tipo, $"{acao} {Descrever(item)}");
+        Registrar(comanda, tipo, descricao);
         await context.SaveChangesAsync();
 
         return Ok(comanda.ToResponse());
