@@ -42,7 +42,7 @@ export const routes: Routes = [
         path: 'comandas/:id',
         canActivate: [cargoGuard],
         data: { cargos: ['Gerente', 'Garcom', 'Caixa'], titulo: 'Comanda' },
-        loadComponent: () => import('./paginas/em-breve/em-breve').then((m) => m.EmBreve),
+        loadComponent: () => import('./paginas/comanda/comanda').then((m) => m.Comanda),
         title: 'Comanda | Comandix',
       },
     ],

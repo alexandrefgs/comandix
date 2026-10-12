@@ -11,6 +11,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { Observable, forkJoin, timer } from 'rxjs';
+import { tempoDecorrido } from '../../util/tempo';
 
 import { mensagemDeErro } from '../../api/erros';
 import { ComandaResumo, Funcionario, Mesa, MesaDados, SalaoService } from '../../api/salao.service';
@@ -407,13 +408,8 @@ export class Mesas {
     });
   }
 
-  protected tempoAberta(abertaEm: string): string {
-    const minutos = Math.floor((this.agora() - Date.parse(abertaEm)) / 60_000);
-
-    if (minutos < 1) return 'agora';
-    if (minutos < 60) return `há ${minutos} min`;
-
-    return `há ${Math.floor(minutos / 60)} h ${minutos % 60} min`;
+    protected tempoAberta(abertaEm: string): string {
+    return tempoDecorrido(abertaEm, this.agora());
   }
 
   private atualizar(): void {
