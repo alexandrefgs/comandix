@@ -19,10 +19,13 @@ public class Mesa : EntityBase
     }
 
     public void Atualizar(int numero, int capacidade)
-    {
-        Numero = numero;
-        Capacidade = capacidade;
-    }
+{
+    if (Status == StatusMesa.Ocupada)
+        throw new DomainException("Não é possível editar uma mesa ocupada.");
+
+    Numero = numero;
+    Capacidade = capacidade;
+}
 
     public void Ativar() => Ativa = true;
 

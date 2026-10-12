@@ -152,28 +152,29 @@ public class ComandasEndpointsTests(ComandixApiFactory factory) : ApiTestBase(fa
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
     [Fact]
-public async Task Listar_DeveTrazerMesaGarcomEItensProntos()
-{
-    var categoria = await CriarCategoria();
-    var pizza = await CriarProduto(categoria.Id, "Pizza", 60m);
-    var mesa = await CriarMesa();
-    var garcom = await CriarGarcom();
-    var comanda = await AbrirComanda(mesa.Id, garcom.Id);
-    comanda = await PostAsync<ComandaResponse>(
-        $"api/comandas/{comanda.Id}/itens",
-        new AdicionarItemRequest(pizza.Id, 1, null)
-    );
-    var item = comanda.Itens.Single();
+    public async Task Listar_DeveTrazerMesaGarcomEItensProntos()
+    {
+        var categoria = await CriarCategoria();
+        var pizza = await CriarProduto(categoria.Id, "Pizza", 60m);
+        var mesa = await CriarMesa();
+        var garcom = await CriarGarcom();
+        var comanda = await AbrirComanda(mesa.Id, garcom.Id);
+        comanda = await PostAsync<ComandaResponse>(
+            $"api/comandas/{comanda.Id}/itens",
+            new AdicionarItemRequest(pizza.Id, 1, null)
+        );
+        var item = comanda.Itens.Single();
 
-    for (var i = 0; i < 2; i++)
-        await PatchAsync<ComandaResponse>($"api/comandas/{comanda.Id}/itens/{item.Id}/avancar");
+        for (var i = 0; i < 2; i++)
+            await PatchAsync<ComandaResponse>($"api/comandas/{comanda.Id}/itens/{item.Id}/avancar");
 
-    var resumos = await GetAsync<List<ComandaResumoResponse>>($"api/comandas?mesaId={mesa.Id}");
+        var resumos = await GetAsync<List<ComandaResumoResponse>>($"api/comandas?mesaId={mesa.Id}");
 
-    var resumo = Assert.Single(resumos);
-    Assert.Equal(mesa.Id, resumo.MesaId);
-    Assert.Equal(garcom.Id, resumo.GarcomId);
-    Assert.Equal(1, resumo.ItensProntos);
-}
+        var resumo = Assert.Single(resumos);
+        Assert.Equal(mesa.Id, resumo.MesaId);
+        Assert.Equal(garcom.Id, resumo.GarcomId);
+        Assert.Equal(1, resumo.ItensProntos);
+    }
 }
