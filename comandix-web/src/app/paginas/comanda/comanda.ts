@@ -113,7 +113,9 @@ const ORDEM_STATUS: Record<StatusItem, number> = {
                     }
                   </div>
 
-                  <span class="text-sm tabular-nums">{{ item.subtotal | currency }}</span>
+                  <span class="text-sm tabular-nums" [class.line-through]="item.status === 'Cancelado'">
+                    {{ item.subtotal | currency }}
+                  </span>
                   <p-tag [value]="rotuloStatus[item.status]" [severity]="severidadeStatus[item.status]" />
 
                   @if (podeEditar()) {
