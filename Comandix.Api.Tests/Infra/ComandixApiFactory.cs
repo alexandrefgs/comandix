@@ -1,10 +1,10 @@
+using Comandix.Api.Seed;
 using Comandix.Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Comandix.Api.Seed;
 
 namespace Comandix.Api.Tests.Infra;
 

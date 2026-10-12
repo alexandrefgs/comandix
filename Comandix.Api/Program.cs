@@ -4,7 +4,9 @@ using Comandix.Api.Auth;
 using Comandix.Api.ExceptionHandlers;
 using Comandix.Api.Seed;
 using Comandix.Domain.Entities;
+using Comandix.Domain.Fiscal;
 using Comandix.Infrastructure.Data;
+using Comandix.Infrastructure.Fiscal;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -32,6 +34,23 @@ builder
 
 builder.Services.AddSingleton<IPasswordHasher<Funcionario>, PasswordHasher<Funcionario>>();
 builder.Services.AddSingleton<TokenService>();
+builder.Services.Configure<NotaFiscalOptions>(
+    builder.Configuration.GetSection(NotaFiscalOptions.Secao)
+);
+
+builder.Services.AddScoped<IEmissorNotaFiscal>(sp =>
+{
+    var modo = sp.GetRequiredService<IOptions<NotaFiscalOptions>>().Value.Modo;
+
+    return modo switch
+    {
+        NotaFiscalOptions.ModoSimulacao =>
+            ActivatorUtilities.CreateInstance<EmissorNotaFiscalSimulado>(sp),
+        _ => throw new InvalidOperationException(
+            $"Modo de nota fiscal não suportado: '{modo}'. Configure NotaFiscal:Modo."
+        ),
+    };
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 

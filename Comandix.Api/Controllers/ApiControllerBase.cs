@@ -2,7 +2,6 @@ using Comandix.Api.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-
 namespace Comandix.Api.Controllers;
 
 [ApiController]

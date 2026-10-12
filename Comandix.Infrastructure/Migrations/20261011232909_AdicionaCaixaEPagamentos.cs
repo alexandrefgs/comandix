@@ -17,18 +17,38 @@ namespace Comandix.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AbertoPorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ValorAbertura = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    ValorAbertura = table.Column<decimal>(
+                        type: "decimal(10,2)",
+                        precision: 10,
+                        scale: 2,
+                        nullable: false
+                    ),
+                    Status = table.Column<string>(
+                        type: "nvarchar(20)",
+                        maxLength: 20,
+                        nullable: false
+                    ),
                     FechadoEm = table.Column<DateTime>(type: "datetime2", nullable: true),
                     FechadoPorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ValorEsperadoDinheiro = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: true),
-                    ValorContadoDinheiro = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: true),
-                    CriadoEm = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    ValorEsperadoDinheiro = table.Column<decimal>(
+                        type: "decimal(10,2)",
+                        precision: 10,
+                        scale: 2,
+                        nullable: true
+                    ),
+                    ValorContadoDinheiro = table.Column<decimal>(
+                        type: "decimal(10,2)",
+                        precision: 10,
+                        scale: 2,
+                        nullable: true
+                    ),
+                    CriadoEm = table.Column<DateTime>(type: "datetime2", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Caixas", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "MovimentacoesCaixa",
@@ -36,11 +56,24 @@ namespace Comandix.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CaixaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Tipo = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Valor = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    Motivo = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Tipo = table.Column<string>(
+                        type: "nvarchar(20)",
+                        maxLength: 20,
+                        nullable: false
+                    ),
+                    Valor = table.Column<decimal>(
+                        type: "decimal(10,2)",
+                        precision: 10,
+                        scale: 2,
+                        nullable: false
+                    ),
+                    Motivo = table.Column<string>(
+                        type: "nvarchar(200)",
+                        maxLength: 200,
+                        nullable: false
+                    ),
                     FuncionarioId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CriadoEm = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CriadoEm = table.Column<DateTime>(type: "datetime2", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -50,8 +83,10 @@ namespace Comandix.Infrastructure.Migrations
                         column: x => x.CaixaId,
                         principalTable: "Caixas",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateTable(
                 name: "Pagamentos",
@@ -61,15 +96,33 @@ namespace Comandix.Infrastructure.Migrations
                     ComandaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CaixaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PessoaId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Forma = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Valor = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    ValorRecebido = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
+                    Forma = table.Column<string>(
+                        type: "nvarchar(20)",
+                        maxLength: 20,
+                        nullable: false
+                    ),
+                    Valor = table.Column<decimal>(
+                        type: "decimal(10,2)",
+                        precision: 10,
+                        scale: 2,
+                        nullable: false
+                    ),
+                    ValorRecebido = table.Column<decimal>(
+                        type: "decimal(10,2)",
+                        precision: 10,
+                        scale: 2,
+                        nullable: false
+                    ),
                     RegistradoPorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Estornado = table.Column<bool>(type: "bit", nullable: false),
                     EstornadoEm = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EstornadoPorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    MotivoEstorno = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    CriadoEm = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    MotivoEstorno = table.Column<string>(
+                        type: "nvarchar(200)",
+                        maxLength: 200,
+                        nullable: true
+                    ),
+                    CriadoEm = table.Column<DateTime>(type: "datetime2", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -79,49 +132,53 @@ namespace Comandix.Infrastructure.Migrations
                         column: x => x.CaixaId,
                         principalTable: "Caixas",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Restrict
+                    );
                     table.ForeignKey(
                         name: "FK_Pagamentos_Comandas_ComandaId",
                         column: x => x.ComandaId,
                         principalTable: "Comandas",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Caixas_Status",
                 table: "Caixas",
                 column: "Status",
                 unique: true,
-                filter: "[Status] = 'Aberto'");
+                filter: "[Status] = 'Aberto'"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_MovimentacoesCaixa_CaixaId",
                 table: "MovimentacoesCaixa",
-                column: "CaixaId");
+                column: "CaixaId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Pagamentos_CaixaId",
                 table: "Pagamentos",
-                column: "CaixaId");
+                column: "CaixaId"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Pagamentos_ComandaId",
                 table: "Pagamentos",
-                column: "ComandaId");
+                column: "ComandaId"
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "MovimentacoesCaixa");
+            migrationBuilder.DropTable(name: "MovimentacoesCaixa");
 
-            migrationBuilder.DropTable(
-                name: "Pagamentos");
+            migrationBuilder.DropTable(name: "Pagamentos");
 
-            migrationBuilder.DropTable(
-                name: "Caixas");
+            migrationBuilder.DropTable(name: "Caixas");
         }
     }
 }

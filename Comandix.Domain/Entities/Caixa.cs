@@ -38,8 +38,11 @@ public class Caixa : EntityBase
     public decimal CalcularDinheiroEsperado(decimal totalVendasDinheiro) =>
         ValorAbertura + TotalSuprimentos - TotalSangrias + totalVendasDinheiro;
 
-    public MovimentacaoCaixa RegistrarSuprimento(decimal valor, string motivo, Guid funcionarioId) =>
-        RegistrarMovimentacao(TipoMovimentacaoCaixa.Suprimento, valor, motivo, funcionarioId);
+    public MovimentacaoCaixa RegistrarSuprimento(
+        decimal valor,
+        string motivo,
+        Guid funcionarioId
+    ) => RegistrarMovimentacao(TipoMovimentacaoCaixa.Suprimento, valor, motivo, funcionarioId);
 
     public MovimentacaoCaixa RegistrarSangria(decimal valor, string motivo, Guid funcionarioId) =>
         RegistrarMovimentacao(TipoMovimentacaoCaixa.Sangria, valor, motivo, funcionarioId);

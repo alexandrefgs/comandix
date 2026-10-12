@@ -30,7 +30,9 @@ public class CaixasController(ComandixDbContext context) : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CaixaResponse>> ObterPorId(Guid id)
     {
-        var caixa = await CaixasComMovimentacoes().AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+        var caixa = await CaixasComMovimentacoes()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id);
 
         return caixa is null ? NotFound() : Ok(await MontarResposta(caixa));
     }
@@ -56,7 +58,11 @@ public class CaixasController(ComandixDbContext context) : ApiControllerBase
             return Conflito("Já existe um caixa aberto.");
         }
 
-        return CreatedAtAction(nameof(ObterPorId), new { id = caixa.Id }, await MontarResposta(caixa));
+        return CreatedAtAction(
+            nameof(ObterPorId),
+            new { id = caixa.Id },
+            await MontarResposta(caixa)
+        );
     }
 
     [HttpPost("{id:guid}/suprimento")]

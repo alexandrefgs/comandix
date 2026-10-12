@@ -15,35 +15,40 @@ namespace Comandix.Infrastructure.Migrations
                 table: "Funcionarios",
                 type: "bit",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "CodigoAcessoHash",
                 table: "Funcionarios",
                 type: "nvarchar(64)",
                 maxLength: 64,
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "PinHash",
                 table: "Funcionarios",
                 type: "nvarchar(200)",
                 maxLength: 200,
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "TentativasPinFalhas",
                 table: "Funcionarios",
                 type: "int",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Funcionarios_CodigoAcessoHash",
                 table: "Funcionarios",
                 column: "CodigoAcessoHash",
                 unique: true,
-                filter: "[CodigoAcessoHash] IS NOT NULL");
+                filter: "[CodigoAcessoHash] IS NOT NULL"
+            );
         }
 
         /// <inheritdoc />
@@ -51,23 +56,16 @@ namespace Comandix.Infrastructure.Migrations
         {
             migrationBuilder.DropIndex(
                 name: "IX_Funcionarios_CodigoAcessoHash",
-                table: "Funcionarios");
+                table: "Funcionarios"
+            );
 
-            migrationBuilder.DropColumn(
-                name: "AcessoBloqueado",
-                table: "Funcionarios");
+            migrationBuilder.DropColumn(name: "AcessoBloqueado", table: "Funcionarios");
 
-            migrationBuilder.DropColumn(
-                name: "CodigoAcessoHash",
-                table: "Funcionarios");
+            migrationBuilder.DropColumn(name: "CodigoAcessoHash", table: "Funcionarios");
 
-            migrationBuilder.DropColumn(
-                name: "PinHash",
-                table: "Funcionarios");
+            migrationBuilder.DropColumn(name: "PinHash", table: "Funcionarios");
 
-            migrationBuilder.DropColumn(
-                name: "TentativasPinFalhas",
-                table: "Funcionarios");
+            migrationBuilder.DropColumn(name: "TentativasPinFalhas", table: "Funcionarios");
         }
     }
 }

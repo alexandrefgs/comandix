@@ -44,7 +44,7 @@ public class ComandaConfiguration : IEntityTypeConfiguration<Comanda>
             .WithOne()
             .HasForeignKey(p => p.ComandaId)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
         builder
             .HasMany(c => c.Pagamentos)
             .WithOne()
@@ -54,7 +54,6 @@ public class ComandaConfiguration : IEntityTypeConfiguration<Comanda>
         builder.Navigation(c => c.Pagamentos).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(c => c.Itens).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(c => c.Pessoas).UsePropertyAccessMode(PropertyAccessMode.Field);
-        
 
         builder.HasIndex(c => c.MesaId).IsUnique().HasFilter("[Status] = 'Aberta'");
 

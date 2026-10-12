@@ -1,8 +1,8 @@
 using System.Net;
+using System.Net.Http.Json;
 using Comandix.Api.Dtos;
 using Comandix.Api.Tests.Infra;
 using Comandix.Domain.Enums;
-using System.Net.Http.Json;
 
 namespace Comandix.Api.Tests;
 
@@ -24,7 +24,10 @@ public class AuthEndpointsTests(ComandixApiFactory factory) : ApiTestBase(factor
     [Fact]
     public async Task Login_ComSenhaErrada_DeveRetornar401()
     {
-        var response = await EnviarPost("api/auth/login", new LoginRequest("gerente", "SenhaErrada123"));
+        var response = await EnviarPost(
+            "api/auth/login",
+            new LoginRequest("gerente", "SenhaErrada123")
+        );
 
         var problema = await LerProblema(response, HttpStatusCode.Unauthorized);
         Assert.Equal("Usuário ou senha inválidos.", problema.Detail);

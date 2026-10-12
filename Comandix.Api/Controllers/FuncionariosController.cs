@@ -11,10 +11,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Comandix.Api.Controllers;
 
 [Route("api/funcionarios")]
-public class FuncionariosController(
-    ComandixDbContext context,
-    IPasswordHasher<Funcionario> hasher
-) : ApiControllerBase
+public class FuncionariosController(ComandixDbContext context, IPasswordHasher<Funcionario> hasher)
+    : ApiControllerBase
 {
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -148,52 +146,53 @@ public class FuncionariosController(
 
         return NoContent();
     }
+
     [HttpPost("{id:guid}/codigo-acesso")]
-[Authorize(Roles = Perfis.Gerente)]
-[ProducesResponseType(StatusCodes.Status200OK)]
-[ProducesResponseType(StatusCodes.Status404NotFound)]
-public async Task<ActionResult<CodigoAcessoResponse>> GerarCodigoAcesso(Guid id)
-{
-    var funcionario = await context.Funcionarios.FindAsync(id);
-    if (funcionario is null)
-        return NotFound();
+    [Authorize(Roles = Perfis.Gerente)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<CodigoAcessoResponse>> GerarCodigoAcesso(Guid id)
+    {
+        var funcionario = await context.Funcionarios.FindAsync(id);
+        if (funcionario is null)
+            return NotFound();
 
-    var (codigo, hash) = CodigoAcesso.Gerar();
-    funcionario.DefinirCodigoAcesso(hash);
-    await context.SaveChangesAsync();
+        var (codigo, hash) = CodigoAcesso.Gerar();
+        funcionario.DefinirCodigoAcesso(hash);
+        await context.SaveChangesAsync();
 
-    return Ok(new CodigoAcessoResponse(codigo));
-}
+        return Ok(new CodigoAcessoResponse(codigo));
+    }
 
-[HttpPost("{id:guid}/pin/resetar")]
-[Authorize(Roles = Perfis.Gerente)]
-[ProducesResponseType(StatusCodes.Status204NoContent)]
-[ProducesResponseType(StatusCodes.Status404NotFound)]
-public async Task<IActionResult> ResetarPin(Guid id)
-{
-    var funcionario = await context.Funcionarios.FindAsync(id);
-    if (funcionario is null)
-        return NotFound();
+    [HttpPost("{id:guid}/pin/resetar")]
+    [Authorize(Roles = Perfis.Gerente)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ResetarPin(Guid id)
+    {
+        var funcionario = await context.Funcionarios.FindAsync(id);
+        if (funcionario is null)
+            return NotFound();
 
-    funcionario.ResetarPin();
-    await context.SaveChangesAsync();
+        funcionario.ResetarPin();
+        await context.SaveChangesAsync();
 
-    return NoContent();
-}
+        return NoContent();
+    }
 
-[HttpPost("{id:guid}/desbloquear")]
-[Authorize(Roles = Perfis.Gerente)]
-[ProducesResponseType(StatusCodes.Status204NoContent)]
-[ProducesResponseType(StatusCodes.Status404NotFound)]
-public async Task<IActionResult> Desbloquear(Guid id)
-{
-    var funcionario = await context.Funcionarios.FindAsync(id);
-    if (funcionario is null)
-        return NotFound();
+    [HttpPost("{id:guid}/desbloquear")]
+    [Authorize(Roles = Perfis.Gerente)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Desbloquear(Guid id)
+    {
+        var funcionario = await context.Funcionarios.FindAsync(id);
+        if (funcionario is null)
+            return NotFound();
 
-    funcionario.Desbloquear();
-    await context.SaveChangesAsync();
+        funcionario.Desbloquear();
+        await context.SaveChangesAsync();
 
-    return NoContent();
-}
+        return NoContent();
+    }
 }

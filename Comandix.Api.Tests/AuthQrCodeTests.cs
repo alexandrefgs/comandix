@@ -75,14 +75,23 @@ public class AuthQrCodeTests(ComandixApiFactory factory) : ApiTestBase(factory)
 
         for (var i = 1; i < Funcionario.MaximoTentativasPin; i++)
         {
-            var erro = await EnviarPost("api/auth/qrcode/login", new QrCodePinRequest(codigo, "0000"));
+            var erro = await EnviarPost(
+                "api/auth/qrcode/login",
+                new QrCodePinRequest(codigo, "0000")
+            );
             Assert.Equal(HttpStatusCode.Unauthorized, erro.StatusCode);
         }
 
-        var bloqueio = await EnviarPost("api/auth/qrcode/login", new QrCodePinRequest(codigo, "0000"));
+        var bloqueio = await EnviarPost(
+            "api/auth/qrcode/login",
+            new QrCodePinRequest(codigo, "0000")
+        );
         Assert.Equal(HttpStatusCode.Forbidden, bloqueio.StatusCode);
 
-        var comPinCorreto = await EnviarPost("api/auth/qrcode/login", new QrCodePinRequest(codigo, Pin));
+        var comPinCorreto = await EnviarPost(
+            "api/auth/qrcode/login",
+            new QrCodePinRequest(codigo, Pin)
+        );
         Assert.Equal(HttpStatusCode.Forbidden, comPinCorreto.StatusCode);
     }
 
@@ -108,7 +117,9 @@ public class AuthQrCodeTests(ComandixApiFactory factory) : ApiTestBase(factory)
     {
         var (garcom, codigoAntigo) = await CriarGarcomComPin();
 
-        var novo = await PostAsync<CodigoAcessoResponse>($"api/funcionarios/{garcom.Id}/codigo-acesso");
+        var novo = await PostAsync<CodigoAcessoResponse>(
+            $"api/funcionarios/{garcom.Id}/codigo-acesso"
+        );
 
         var comAntigo = await EnviarPost(
             "api/auth/qrcode/login",
@@ -133,8 +144,14 @@ public class AuthQrCodeTests(ComandixApiFactory factory) : ApiTestBase(factory)
             new QrCodePinRequest(codigo, Pin)
         );
 
-        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.Token);
-        var comanda = await PostAsync<ComandaResponse>("api/comandas", new AbrirComandaRequest(mesa.Id));
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer",
+            login.Token
+        );
+        var comanda = await PostAsync<ComandaResponse>(
+            "api/comandas",
+            new AbrirComandaRequest(mesa.Id)
+        );
 
         Assert.Equal(garcom.Id, comanda.GarcomId);
     }
@@ -142,14 +159,19 @@ public class AuthQrCodeTests(ComandixApiFactory factory) : ApiTestBase(factory)
     private async Task<(FuncionarioResponse Garcom, string Codigo)> CriarGarcomComCodigo()
     {
         var garcom = await CriarGarcom();
-        var acesso = await PostAsync<CodigoAcessoResponse>($"api/funcionarios/{garcom.Id}/codigo-acesso");
+        var acesso = await PostAsync<CodigoAcessoResponse>(
+            $"api/funcionarios/{garcom.Id}/codigo-acesso"
+        );
         return (garcom, acesso.Codigo);
     }
 
     private async Task<(FuncionarioResponse Garcom, string Codigo)> CriarGarcomComPin()
     {
         var (garcom, codigo) = await CriarGarcomComCodigo();
-        await PostAsync<LoginResponse>("api/auth/qrcode/definir-pin", new QrCodePinRequest(codigo, Pin));
+        await PostAsync<LoginResponse>(
+            "api/auth/qrcode/definir-pin",
+            new QrCodePinRequest(codigo, Pin)
+        );
         return (garcom, codigo);
     }
 }

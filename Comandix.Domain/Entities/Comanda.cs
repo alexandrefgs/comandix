@@ -202,9 +202,7 @@ public class Comanda : EntityBase
         ObterPessoa(pessoaId);
 
         var total = CalcularDivisao().Single(d => d.PessoaId == pessoaId).Total;
-        var pago = _pagamentos
-            .Where(p => !p.Estornado && p.PessoaId == pessoaId)
-            .Sum(p => p.Valor);
+        var pago = _pagamentos.Where(p => !p.Estornado && p.PessoaId == pessoaId).Sum(p => p.Valor);
 
         return total - pago;
     }

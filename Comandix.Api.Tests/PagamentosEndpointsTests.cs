@@ -11,7 +11,10 @@ public class PagamentosEndpointsTests(ComandixApiFactory factory) : ApiTestBase(
     public async Task RegistrarPagamento_SemCaixaAberto_DeveRetornar400()
     {
         var caixa = await AbrirNovoCaixa();
-        await PostAsync<CaixaResponse>($"api/caixas/{caixa.Id}/fechar", new FecharCaixaRequest(100m));
+        await PostAsync<CaixaResponse>(
+            $"api/caixas/{caixa.Id}/fechar",
+            new FecharCaixaRequest(100m)
+        );
         var comanda = await NovaComandaComPizza();
 
         var response = await EnviarPost(
@@ -97,7 +100,10 @@ public class PagamentosEndpointsTests(ComandixApiFactory factory) : ApiTestBase(
             $"api/comandas/{comanda.Id}/pagamentos",
             new RegistrarPagamentoRequest(FormaPagamento.Pix, 30m)
         );
-        await PostAsync<CaixaResponse>($"api/caixas/{caixa.Id}/fechar", new FecharCaixaRequest(100m));
+        await PostAsync<CaixaResponse>(
+            $"api/caixas/{caixa.Id}/fechar",
+            new FecharCaixaRequest(100m)
+        );
         await AbrirNovoCaixa();
 
         var response = await EnviarPost(
@@ -147,6 +153,8 @@ public class PagamentosEndpointsTests(ComandixApiFactory factory) : ApiTestBase(
     {
         foreach (var item in comanda.Itens)
             for (var i = 0; i < 3; i++)
-                await PatchAsync<ComandaResponse>($"api/comandas/{comanda.Id}/itens/{item.Id}/avancar");
+                await PatchAsync<ComandaResponse>(
+                    $"api/comandas/{comanda.Id}/itens/{item.Id}/avancar"
+                );
     }
 }

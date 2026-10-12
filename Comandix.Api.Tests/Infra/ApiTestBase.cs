@@ -35,7 +35,10 @@ public abstract class ApiTestBase
 
     protected void AutenticarComo(Guid id, string nome, Cargo cargo)
     {
-        var token = Factory.Services.GetRequiredService<TokenService>().Gerar(id, nome, cargo).Token;
+        var token = Factory
+            .Services.GetRequiredService<TokenService>()
+            .Gerar(id, nome, cargo)
+            .Token;
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
@@ -94,18 +97,21 @@ public abstract class ApiTestBase
 
     protected Task<ComandaResponse> AbrirComanda(Guid mesaId, Guid garcomId) =>
         PostAsync<ComandaResponse>("api/comandas", new AbrirComandaRequest(mesaId, garcomId));
-    
-    protected async Task<CaixaResponse> AbrirNovoCaixa(decimal valorAbertura = 100m)
-{
-    var atual = await Client.GetAsync("api/caixas/atual");
-    if (atual.IsSuccessStatusCode)
-    {
-        var caixa = (await atual.Content.ReadFromJsonAsync<CaixaResponse>(Json))!;
-        await PostAsync<CaixaResponse>($"api/caixas/{caixa.Id}/fechar", new FecharCaixaRequest(0m));
-    }
 
-    return await PostAsync<CaixaResponse>("api/caixas", new AbrirCaixaRequest(valorAbertura));
-}
+    protected async Task<CaixaResponse> AbrirNovoCaixa(decimal valorAbertura = 100m)
+    {
+        var atual = await Client.GetAsync("api/caixas/atual");
+        if (atual.IsSuccessStatusCode)
+        {
+            var caixa = (await atual.Content.ReadFromJsonAsync<CaixaResponse>(Json))!;
+            await PostAsync<CaixaResponse>(
+                $"api/caixas/{caixa.Id}/fechar",
+                new FecharCaixaRequest(0m)
+            );
+        }
+
+        return await PostAsync<CaixaResponse>("api/caixas", new AbrirCaixaRequest(valorAbertura));
+    }
 
     private static async Task<T> Ler<T>(HttpResponseMessage response)
     {

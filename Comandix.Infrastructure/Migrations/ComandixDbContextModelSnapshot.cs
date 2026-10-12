@@ -298,6 +298,55 @@ namespace Comandix.Infrastructure.Migrations
                     b.ToTable("MovimentacoesCaixa", (string)null);
                 });
 
+            modelBuilder.Entity("Comandix.Domain.Entities.NotaFiscal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChaveAcesso")
+                        .IsRequired()
+                        .HasMaxLength(44)
+                        .HasColumnType("nchar(44)")
+                        .IsFixedLength();
+
+                    b.Property<Guid>("ComandaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Numero")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Protocolo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Serie")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Simulada")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("ValorTotal")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChaveAcesso")
+                        .IsUnique();
+
+                    b.HasIndex("ComandaId")
+                        .IsUnique();
+
+                    b.HasIndex("Serie", "Numero")
+                        .IsUnique();
+
+                    b.ToTable("NotasFiscais", (string)null);
+                });
+
             modelBuilder.Entity("Comandix.Domain.Entities.Pagamento", b =>
                 {
                     b.Property<Guid>("Id")
@@ -470,6 +519,15 @@ namespace Comandix.Infrastructure.Migrations
                         .WithMany("Movimentacoes")
                         .HasForeignKey("CaixaId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Comandix.Domain.Entities.NotaFiscal", b =>
+                {
+                    b.HasOne("Comandix.Domain.Entities.Comanda", null)
+                        .WithMany()
+                        .HasForeignKey("ComandaId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

@@ -3,10 +3,13 @@ using Comandix.Api.Dtos;
 using Comandix.Api.Mappings;
 using Comandix.Domain.Entities;
 using Comandix.Domain.Enums;
+using Comandix.Domain.Fiscal;
 using Comandix.Infrastructure.Data;
+using Comandix.Infrastructure.Fiscal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Comandix.Api.Controllers;
 
@@ -211,86 +214,142 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
     }
 
     [HttpPost("{id:guid}/pagamentos")]
-[Authorize(Roles = Perfis.Fechamento)]
-[ProducesResponseType(StatusCodes.Status200OK)]
-[ProducesResponseType(StatusCodes.Status404NotFound)]
-public async Task<ActionResult<ComandaResponse>> RegistrarPagamento(
-    Guid id,
-    RegistrarPagamentoRequest request
-)
-{
-    var comanda = await ObterComanda(id);
-    if (comanda is null)
-        return NotFound();
-
-    var caixaId = await context
-        .Caixas.Where(c => c.Status == StatusCaixa.Aberto)
-        .Select(c => (Guid?)c.Id)
-        .FirstOrDefaultAsync();
-
-    if (caixaId is null)
-        return RequisicaoInvalida("Não há caixa aberto. Abra o caixa antes de registrar pagamentos.");
-
-    comanda.RegistrarPagamento(
-        caixaId.Value,
-        request.Forma,
-        request.Valor,
-        request.ValorRecebido,
-        request.PessoaId,
-        FuncionarioLogadoId
-    );
-    await context.SaveChangesAsync();
-
-    return Ok(comanda.ToResponse());
-}
-
-[HttpPost("{id:guid}/pagamentos/{pagamentoId:guid}/estornar")]
-[Authorize(Roles = Perfis.Financeiro)]
-[ProducesResponseType(StatusCodes.Status200OK)]
-[ProducesResponseType(StatusCodes.Status404NotFound)]
-public async Task<ActionResult<ComandaResponse>> EstornarPagamento(
-    Guid id,
-    Guid pagamentoId,
-    EstornarPagamentoRequest request
-)
-{
-    var comanda = await ObterComanda(id);
-    if (comanda is null)
-        return NotFound();
-
-    var pagamento = comanda.Pagamentos.FirstOrDefault(p => p.Id == pagamentoId);
-    if (pagamento is null)
-        return NotFound();
-
-    if (
-        await context.Caixas.AnyAsync(c =>
-            c.Id == pagamento.CaixaId && c.Status == StatusCaixa.Fechado
-        )
+    [Authorize(Roles = Perfis.Fechamento)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ComandaResponse>> RegistrarPagamento(
+        Guid id,
+        RegistrarPagamentoRequest request
     )
-        return RequisicaoInvalida(
-            "O pagamento pertence a um caixa já fechado e não pode ser estornado."
+    {
+        var comanda = await ObterComanda(id);
+        if (comanda is null)
+            return NotFound();
+
+        var caixaId = await context
+            .Caixas.Where(c => c.Status == StatusCaixa.Aberto)
+            .Select(c => (Guid?)c.Id)
+            .FirstOrDefaultAsync();
+
+        if (caixaId is null)
+            return RequisicaoInvalida(
+                "Não há caixa aberto. Abra o caixa antes de registrar pagamentos."
+            );
+
+        comanda.RegistrarPagamento(
+            caixaId.Value,
+            request.Forma,
+            request.Valor,
+            request.ValorRecebido,
+            request.PessoaId,
+            FuncionarioLogadoId
         );
+        await context.SaveChangesAsync();
 
-    comanda.EstornarPagamento(pagamentoId, request.Motivo, FuncionarioLogadoId);
-    await context.SaveChangesAsync();
+        return Ok(comanda.ToResponse());
+    }
 
-    return Ok(comanda.ToResponse());
-}
+    [HttpPost("{id:guid}/pagamentos/{pagamentoId:guid}/estornar")]
+    [Authorize(Roles = Perfis.Financeiro)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ComandaResponse>> EstornarPagamento(
+        Guid id,
+        Guid pagamentoId,
+        EstornarPagamentoRequest request
+    )
+    {
+        var comanda = await ObterComanda(id);
+        if (comanda is null)
+            return NotFound();
+
+        var pagamento = comanda.Pagamentos.FirstOrDefault(p => p.Id == pagamentoId);
+        if (pagamento is null)
+            return NotFound();
+
+        if (
+            await context.Caixas.AnyAsync(c =>
+                c.Id == pagamento.CaixaId && c.Status == StatusCaixa.Fechado
+            )
+        )
+            return RequisicaoInvalida(
+                "O pagamento pertence a um caixa já fechado e não pode ser estornado."
+            );
+
+        comanda.EstornarPagamento(pagamentoId, request.Motivo, FuncionarioLogadoId);
+        await context.SaveChangesAsync();
+
+        return Ok(comanda.ToResponse());
+    }
 
     [HttpPost("{id:guid}/fechar")]
     [Authorize(Roles = Perfis.Fechamento)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ComandaResponse>> Fechar(Guid id)
+    public async Task<ActionResult<ComandaResponse>> Fechar(
+        Guid id,
+        [FromServices] IEmissorNotaFiscal emissor
+    )
     {
         var comanda = await ObterComanda(id);
         if (comanda is null)
             return NotFound();
 
         comanda.Fechar();
+        await emissor.EmitirAsync(comanda);
         await context.SaveChangesAsync();
 
         return Ok(comanda.ToResponse());
+    }
+
+    [HttpGet("{id:guid}/nota-fiscal")]
+    [Authorize(Roles = Perfis.Fechamento)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<NotaFiscalResponse>> ObterNotaFiscal(
+        Guid id,
+        [FromServices] IOptions<NotaFiscalOptions> opcoes
+    )
+    {
+        var nota = await context
+            .NotasFiscais.AsNoTracking()
+            .FirstOrDefaultAsync(n => n.ComandaId == id);
+        if (nota is null)
+            return NotFound();
+
+        var comanda = await ComandasCompletas().AsNoTracking().FirstAsync(c => c.Id == id);
+        var pagamentos = comanda.Pagamentos.Where(p => !p.Estornado).ToList();
+
+        return Ok(
+            new NotaFiscalResponse(
+                nota.Simulada ? "SIMULAÇÃO - DOCUMENTO SEM VALOR FISCAL" : null,
+                nota.Id,
+                nota.ComandaId,
+                nota.Serie,
+                nota.Numero,
+                nota.ChaveAcesso,
+                nota.Protocolo,
+                nota.CriadoEm,
+                opcoes.Value.RazaoSocialEmitente,
+                opcoes.Value.CnpjEmitente,
+                comanda
+                    .Itens.Where(i => i.Status != StatusItem.Cancelado)
+                    .OrderBy(i => i.CriadoEm)
+                    .Select(i => new NotaFiscalItemResponse(
+                        i.NomeProduto,
+                        i.Quantidade,
+                        i.PrecoUnitario,
+                        i.Subtotal
+                    )),
+                comanda.Consumo,
+                comanda.ValorTaxaServico,
+                nota.ValorTotal,
+                pagamentos
+                    .GroupBy(p => p.Forma)
+                    .Select(g => new NotaFiscalPagamentoResponse(g.Key, g.Sum(p => p.Valor))),
+                pagamentos.Sum(p => p.Troco)
+            )
+        );
     }
 
     [HttpPost("{id:guid}/cancelar")]
@@ -310,14 +369,14 @@ public async Task<ActionResult<ComandaResponse>> EstornarPagamento(
     }
 
     private IQueryable<Comanda> ComandasCompletas() =>
-    context
-        .Comandas.Include(c => c.Mesa)
-        .Include(c => c.Garcom)
-        .Include(c => c.Pessoas)
-        .Include(c => c.Pagamentos)
-        .Include(c => c.Itens)
-            .ThenInclude(i => i.Pagantes)
-        .AsSplitQuery();
+        context
+            .Comandas.Include(c => c.Mesa)
+            .Include(c => c.Garcom)
+            .Include(c => c.Pessoas)
+            .Include(c => c.Pagamentos)
+            .Include(c => c.Itens)
+                .ThenInclude(i => i.Pagantes)
+            .AsSplitQuery();
 
     private Task<Comanda?> ObterComanda(Guid id) =>
         ComandasCompletas().FirstOrDefaultAsync(c => c.Id == id);
