@@ -31,7 +31,7 @@ export const ComandixPreset = definePreset(Aura, {
       900: '{cyan.900}',
       950: '{cyan.950}',
     },
-        colorScheme: {
+    colorScheme: {
       light: {
         primary: {
           color: '{cyan.700}',

@@ -1,6 +1,11 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormsModule,
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { LucideAngularModule, Pencil, Trash2 } from 'lucide-angular';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -165,7 +170,9 @@ import { mensagemDeErro } from '../../api/erros';
                 <ng-template #body let-categoria>
                   <tr>
                     <td class="font-medium">{{ categoria.nome }}</td>
-                    <td class="text-right tabular-nums">{{ quantidadePorCategoria()[categoria.id] ?? 0 }}</td>
+                    <td class="text-right tabular-nums">
+                      {{ quantidadePorCategoria()[categoria.id] ?? 0 }}
+                    </td>
                     <td>
                       <div class="flex justify-end gap-1">
                         <button
@@ -224,7 +231,13 @@ import { mensagemDeErro } from '../../api/erros';
 
         <div class="flex flex-col gap-2">
           <label for="produto-descricao" class="text-sm font-medium">Descrição</label>
-          <textarea pTextarea id="produto-descricao" formControlName="descricao" rows="3" class="w-full"></textarea>
+          <textarea
+            pTextarea
+            id="produto-descricao"
+            formControlName="descricao"
+            rows="3"
+            class="w-full"
+          ></textarea>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2">
@@ -256,7 +269,9 @@ import { mensagemDeErro } from '../../api/erros';
               appendTo="body"
               [fluid]="true"
             />
-            @if (formProduto.controls.categoriaId.invalid && formProduto.controls.categoriaId.touched) {
+            @if (
+              formProduto.controls.categoriaId.invalid && formProduto.controls.categoriaId.touched
+            ) {
               <small class="text-red-600 dark:text-red-400">Escolha uma categoria.</small>
             }
           </div>
@@ -264,7 +279,12 @@ import { mensagemDeErro } from '../../api/erros';
       </form>
 
       <ng-template #footer>
-        <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="dialogoProduto.set(false)" />
+        <p-button
+          label="Cancelar"
+          severity="secondary"
+          [text]="true"
+          (onClick)="dialogoProduto.set(false)"
+        />
         <p-button label="Salvar" [loading]="salvando()" (onClick)="salvarProduto()" />
       </ng-template>
     </p-dialog>
@@ -278,7 +298,11 @@ import { mensagemDeErro } from '../../api/erros';
       [style]="{ width: '24rem' }"
       [breakpoints]="{ '640px': '95vw' }"
     >
-      <form [formGroup]="formCategoria" class="flex flex-col gap-2 pt-1" (ngSubmit)="salvarCategoria()">
+      <form
+        [formGroup]="formCategoria"
+        class="flex flex-col gap-2 pt-1"
+        (ngSubmit)="salvarCategoria()"
+      >
         <label for="categoria-nome" class="text-sm font-medium">Nome</label>
         <input pInputText id="categoria-nome" formControlName="nome" class="w-full" />
         @if (formCategoria.controls.nome.invalid && formCategoria.controls.nome.touched) {
@@ -287,7 +311,12 @@ import { mensagemDeErro } from '../../api/erros';
       </form>
 
       <ng-template #footer>
-        <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="dialogoCategoria.set(false)" />
+        <p-button
+          label="Cancelar"
+          severity="secondary"
+          [text]="true"
+          (onClick)="dialogoCategoria.set(false)"
+        />
         <p-button label="Salvar" [loading]="salvando()" (onClick)="salvarCategoria()" />
       </ng-template>
     </p-dialog>
@@ -324,7 +353,7 @@ export class Cardapio {
     this.produtos().reduce<Record<string, number>>((contagem, produto) => {
       contagem[produto.categoriaId] = (contagem[produto.categoriaId] ?? 0) + 1;
       return contagem;
-    }, {})
+    }, {}),
   );
 
   protected readonly dialogoProduto = signal(false);
@@ -383,7 +412,7 @@ export class Cardapio {
       : this.cardapio.criarProduto(dados);
 
     this.salvar(requisicao, emEdicao ? 'Produto atualizado.' : 'Produto criado.', () =>
-      this.dialogoProduto.set(false)
+      this.dialogoProduto.set(false),
     );
   }
 
@@ -391,7 +420,7 @@ export class Cardapio {
     this.cardapio.alterarDisponibilidade(produto.id, disponivel).subscribe({
       next: () =>
         this.produtos.update((lista) =>
-          lista.map((p) => (p.id === produto.id ? { ...p, disponivel } : p))
+          lista.map((p) => (p.id === produto.id ? { ...p, disponivel } : p)),
         ),
       error: (erro) => {
         this.notificarErro(erro);
@@ -437,7 +466,7 @@ export class Cardapio {
       : this.cardapio.criarCategoria(nome);
 
     this.salvar(requisicao, emEdicao ? 'Categoria atualizada.' : 'Categoria criada.', () =>
-      this.dialogoCategoria.set(false)
+      this.dialogoCategoria.set(false),
     );
   }
 
@@ -449,7 +478,8 @@ export class Cardapio {
       rejectLabel: 'Cancelar',
       acceptButtonProps: { severity: 'danger' },
       rejectButtonProps: { severity: 'secondary', text: true },
-      accept: () => this.salvar(this.cardapio.removerCategoria(categoria.id), 'Categoria removida.'),
+      accept: () =>
+        this.salvar(this.cardapio.removerCategoria(categoria.id), 'Categoria removida.'),
     });
   }
 

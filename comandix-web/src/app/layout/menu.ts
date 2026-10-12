@@ -36,7 +36,7 @@ export const ITENS_MENU: ItemMenu[] = [
     caminho: 'mesas',
     icone: LayoutGrid,
     cargos: ['Gerente', 'Garcom'],
-    carregar: emBreve,
+    carregar: () => import('../paginas/mesas/mesas').then((m) => m.Mesas),
   },
   {
     rotulo: 'Cozinha',

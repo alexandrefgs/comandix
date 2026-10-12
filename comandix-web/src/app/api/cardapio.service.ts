@@ -60,7 +60,7 @@ export class CardapioService {
   alterarDisponibilidade(id: string, disponivel: boolean): Observable<void> {
     return this.http.patch<void>(
       `/api/produtos/${id}/${disponivel ? 'disponivel' : 'indisponivel'}`,
-      null
+      null,
     );
   }
 

@@ -7,6 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "formatar": "prettier --write \"src/**/*.{ts,html,css,json}\"",
+    "dev": "concurrently -n api,web -c cyan,magenta --kill-others \"dotnet run --project ../Comandix.Api --launch-profile https\" \"npm start\"",
     "serve:ssr:comandix-web": "node dist/comandix-web/server/server.mjs"
   },
   "private": true,
@@ -38,6 +40,7 @@
     "@angular/compiler-cli": "^22.1.0",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
+    "concurrently": "^10.0.6",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",

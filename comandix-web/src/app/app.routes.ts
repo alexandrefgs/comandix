@@ -32,6 +32,13 @@ export const routes: Routes = [
         loadComponent: item.carregar,
         title: `${item.rotulo} | Comandix`,
       })),
+      {
+        path: 'comandas/:id',
+        canActivate: [cargoGuard],
+        data: { cargos: ['Gerente', 'Garcom', 'Caixa'], titulo: 'Comanda' },
+        loadComponent: () => import('./paginas/em-breve/em-breve').then((m) => m.EmBreve),
+        title: 'Comanda | Comandix',
+      },
     ],
   },
   { path: '**', redirectTo: '' },

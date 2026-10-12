@@ -1,7 +1,14 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Component, PLATFORM_ID, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { LogOut, LucideAngularModule, Menu, PanelLeftClose, PanelLeftOpen, X } from 'lucide-angular';
+import {
+  LogOut,
+  LucideAngularModule,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  X,
+} from 'lucide-angular';
 
 import { AuthService } from '../auth/auth.service';
 import { ROTULO_CARGO } from '../auth/rotas-por-cargo';
@@ -15,7 +22,7 @@ const CHAVE_RECOLHIDO = 'comandix-menu-recolhido';
 
 @Component({
   selector: 'app-shell',
-    imports: [
+  imports: [
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
@@ -26,8 +33,8 @@ const CHAVE_RECOLHIDO = 'comandix-menu-recolhido';
   ],
   template: `
     <div class="flex h-dvh overflow-hidden">
-    <p-toast position="top-right" />
-    <p-confirmdialog [style]="{ width: '24rem' }" [breakpoints]="{ '640px': '90vw' }" />
+      <p-toast position="top-right" />
+      <p-confirmdialog [style]="{ width: '24rem' }" [breakpoints]="{ '640px': '90vw' }" />
       @if (menuMovelAberto()) {
         <div
           class="fixed inset-0 z-30 bg-slate-950/60 lg:hidden"
@@ -40,7 +47,9 @@ const CHAVE_RECOLHIDO = 'comandix-menu-recolhido';
         class="fixed inset-y-0 left-0 z-40 flex flex-col overflow-hidden border-r border-slate-200 bg-white transition-all duration-200 lg:static dark:border-slate-800 dark:bg-slate-900"
         [class]="classesMenu()"
       >
-        <div class="flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 px-4 dark:border-slate-800">
+        <div
+          class="flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 px-4 dark:border-slate-800"
+        >
           <img src="favicon.svg" alt="" width="28" height="28" class="shrink-0" />
           <span class="text-lg font-bold tracking-tight" [class]="esconderNoRecolhido()">
             Comand<span class="text-cyan-700 dark:text-cyan-400">ix</span>
@@ -67,7 +76,9 @@ const CHAVE_RECOLHIDO = 'comandix-menu-recolhido';
               [class]="link.isActive ? itemAtivo : itemInativo"
             >
               <lucide-icon [img]="item.icone" [size]="18" class="shrink-0" />
-              <span class="whitespace-nowrap" [class]="esconderNoRecolhido()">{{ item.rotulo }}</span>
+              <span class="whitespace-nowrap" [class]="esconderNoRecolhido()">{{
+                item.rotulo
+              }}</span>
             </a>
           }
         </nav>
@@ -150,7 +161,7 @@ export class Shell {
 
   protected readonly menuMovelAberto = signal(false);
   protected readonly recolhido = signal(
-    this.noNavegador && localStorage.getItem(CHAVE_RECOLHIDO) === 'true'
+    this.noNavegador && localStorage.getItem(CHAVE_RECOLHIDO) === 'true',
   );
 
   protected readonly itens = computed(() => {
@@ -170,7 +181,7 @@ export class Shell {
       this.menuMovelAberto() ? 'translate-x-0' : '-translate-x-full',
       'lg:translate-x-0',
       this.recolhido() ? 'w-64 lg:w-16' : 'w-64',
-    ].join(' ')
+    ].join(' '),
   );
 
   constructor() {

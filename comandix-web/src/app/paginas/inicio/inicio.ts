@@ -27,7 +27,7 @@ import { SeletorTema } from '../../tema/seletor-tema';
       </div>
     </header>
 
-        <main class="flex flex-col gap-8 px-4 py-10 sm:px-6 lg:px-10">
+    <main class="flex flex-col gap-8 px-4 py-10 sm:px-6 lg:px-10">
       <div class="flex flex-col gap-3">
         <h1 class="text-4xl font-bold tracking-tight">Comandas, cozinha e caixa num só lugar.</h1>
         <p class="text-lg text-slate-600 dark:text-slate-400">

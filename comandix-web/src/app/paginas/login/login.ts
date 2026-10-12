@@ -125,7 +125,7 @@ export class Login {
         this.erro.set(
           erro.status === 401
             ? (erro.error?.detail ?? 'Usuário ou senha inválidos.')
-            : 'Não foi possível conectar ao servidor. Tente novamente.'
+            : 'Não foi possível conectar ao servidor. Tente novamente.',
         );
         this.carregando.set(false);
       },
