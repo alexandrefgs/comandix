@@ -37,6 +37,11 @@ export interface Funcionario {
   ativo: boolean;
 }
 
+export interface MesaDados {
+  numero: number;
+  capacidade: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SalaoService {
   private readonly http = inject(HttpClient);
@@ -60,5 +65,17 @@ export class SalaoService {
       '/api/comandas',
       garcomId ? { mesaId, garcomId } : { mesaId },
     );
+  }
+
+  criarMesa(dados: MesaDados): Observable<Mesa> {
+    return this.http.post<Mesa>('/api/mesas', dados);
+  }
+
+  atualizarMesa(id: string, dados: MesaDados): Observable<void> {
+    return this.http.put<void>(`/api/mesas/${id}`, dados);
+  }
+
+  removerMesa(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/mesas/${id}`);
   }
 }
