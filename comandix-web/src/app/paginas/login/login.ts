@@ -84,8 +84,14 @@ import { SeletorTema } from '../../tema/seletor-tema';
           <p-button type="submit" label="Entrar" [loading]="carregando()" [fluid]="true" />
         </form>
 
-        <p class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-          Garçom ou cozinha? O acesso por QR Code chega em breve.
+          <p class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
+          Garçom ou cozinha?
+          <a
+            routerLink="/entrar/garcom"
+            class="font-medium text-cyan-700 hover:underline dark:text-cyan-400"
+          >
+            Entrar com o crachá
+          </a>
         </p>
       </div>
     </div>

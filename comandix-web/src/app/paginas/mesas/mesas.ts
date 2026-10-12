@@ -158,8 +158,9 @@ const INTERVALO_ATUALIZACAO = 15_000;
       [draggable]="false"
       [style]="{ width: '24rem' }"
       [breakpoints]="{ '640px': '95vw' }"
+      [pt]="dialogoCentralizado"
     >
-      <div class="flex flex-col gap-4">
+            <div class="flex flex-col items-center gap-4 text-center">
         <p class="text-slate-600 dark:text-slate-400">
           @if (ehGerente()) {
             Escolha o garçom responsável pela mesa.
@@ -170,6 +171,7 @@ const INTERVALO_ATUALIZACAO = 15_000;
 
         @if (ehGerente()) {
           <p-select
+            class="w-full"
             [options]="garcons()"
             optionLabel="nome"
             optionValue="id"
@@ -183,13 +185,15 @@ const INTERVALO_ATUALIZACAO = 15_000;
       </div>
 
       <ng-template #footer>
-        <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="fecharDialogoAbertura(false)" />
-        <p-button
-          label="Abrir mesa"
-          [loading]="abrindo()"
-          [disabled]="ehGerente() && !garcomSelecionado()"
-          (onClick)="confirmarAbertura()"
-        />
+        <div class="flex w-full justify-center gap-2">
+          <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="fecharDialogoAbertura(false)" />
+          <p-button
+            label="Abrir mesa"
+            [loading]="abrindo()"
+            [disabled]="ehGerente() && !garcomSelecionado()"
+            (onClick)="confirmarAbertura()"
+          />
+        </div>
       </ng-template>
     </p-dialog>
 
@@ -259,6 +263,8 @@ export class Mesas {
     'rounded-lg bg-white/80 p-1.5 text-slate-600 shadow-sm hover:bg-white hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-slate-800';
   protected readonly botaoRemover =
     'rounded-lg bg-white/80 p-1.5 text-slate-600 shadow-sm hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-red-950 dark:hover:text-red-400';
+  protected readonly dialogoCentralizado = 
+    {header: 'relative justify-center',headerActions: 'absolute right-4',};
 
   protected readonly ehGerente = computed(() => this.auth.cargo() === 'Gerente');
 

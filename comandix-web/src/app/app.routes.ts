@@ -16,6 +16,12 @@ export const routes: Routes = [
     title: 'Entrar | Comandix',
   },
   {
+    path: 'entrar/garcom',
+    canActivate: [visitanteGuard],
+    loadComponent: () => import('./paginas/login-garcom/login-garcom').then((m) => m.LoginGarcom),
+    title: 'Entrar com o crachá | Comandix',
+  },
+  {
     path: 'app',
     canActivate: [autenticadoGuard],
     loadComponent: () => import('./layout/shell').then((m) => m.Shell),

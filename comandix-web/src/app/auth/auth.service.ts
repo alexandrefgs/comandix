@@ -14,7 +14,16 @@ export interface Sessao {
   cargo: Cargo;
 }
 
+export interface IdentificacaoQrCode {
+  funcionarioId: string;
+  nome: string;
+  cargo: Cargo;
+  possuiPin: boolean;
+  acessoBloqueado: boolean;
+}
+
 const CHAVE = 'comandix-sessao';
+const CARGOS_COM_CRACHA: Cargo[] = ['Garcom', 'Cozinha'];
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -37,14 +46,37 @@ export class AuthService {
       .pipe(tap((sessao) => this.salvar(sessao)));
   }
 
+  identificarQrCode(codigo: string): Observable<IdentificacaoQrCode> {
+    return this.http.post<IdentificacaoQrCode>('/api/auth/qrcode/identificar', { codigo });
+  }
+
+  loginQrCode(codigo: string, pin: string): Observable<Sessao> {
+    return this.http
+      .post<Sessao>('/api/auth/qrcode/login', { codigo, pin })
+      .pipe(tap((sessao) => this.salvar(sessao)));
+  }
+
+  definirPin(codigo: string, pin: string): Observable<Sessao> {
+    return this.http
+      .post<Sessao>('/api/auth/qrcode/definir-pin', { codigo, pin })
+      .pipe(tap((sessao) => this.salvar(sessao)));
+  }
+
   sair(): void {
+    const destino = this.rotaDeLogin();
     this.limpar();
-    this.router.navigateByUrl('/login');
+    this.router.navigateByUrl(destino);
   }
 
   encerrarSessaoExpirada(): void {
+    const destino = this.rotaDeLogin();
     this.limpar();
-    this.router.navigate(['/login'], { queryParams: { expirada: 1 } });
+    this.router.navigate([destino], { queryParams: { expirada: 1 } });
+  }
+
+  private rotaDeLogin(): string {
+    const cargo = this.cargo();
+    return cargo && CARGOS_COM_CRACHA.includes(cargo) ? '/entrar/garcom' : '/login';
   }
 
   private salvar(sessao: Sessao): void {
