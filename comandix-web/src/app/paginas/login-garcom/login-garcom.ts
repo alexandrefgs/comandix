@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputOtpModule } from 'primeng/inputotp';
 import { InputTextModule } from 'primeng/inputtext';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { mensagemDeErro } from '../../api/erros';
 import { AuthService, Sessao } from '../../auth/auth.service';
@@ -171,14 +172,17 @@ export class LoginGarcom {
   constructor() {
     definirIndexacao(false);
 
-    const fragmento = this.route.snapshot.fragment;
-    const codigoDoLink = fragmento ? new URLSearchParams(fragmento).get('codigo') : null;
+    if (!isPlatformBrowser(inject(PLATFORM_ID))) return;
 
-    if (codigoDoLink && isPlatformBrowser(inject(PLATFORM_ID))) {
+    this.route.fragment.pipe(takeUntilDestroyed()).subscribe((fragmento) => {
+      const codigoDoLink = fragmento ? new URLSearchParams(fragmento).get('codigo') : null;
+      if (!codigoDoLink) return;
+
+      this.voltar();
       this.codigo.set(codigoDoLink);
       this.router.navigate([], { relativeTo: this.route, replaceUrl: true });
       this.identificar();
-    }
+    });
   }
 
   protected identificar(): void {
