@@ -84,6 +84,19 @@ public class Comanda : EntityBase
         ObterItem(itemId).AvancarStatus();
     }
 
+    public void TrocarMesa(Mesa novaMesa)
+{
+    GarantirAberta();
+
+    if (novaMesa.Id == MesaId)
+        throw new DomainException("A comanda já está nessa mesa.");
+
+    novaMesa.Ocupar();
+    Mesa.Liberar();
+    MesaId = novaMesa.Id;
+    Mesa = novaMesa;
+}
+
     public void DefinirCobrancaTaxaServico(bool cobrar)
     {
         GarantirAberta();

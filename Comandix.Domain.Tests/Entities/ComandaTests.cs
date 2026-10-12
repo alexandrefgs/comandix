@@ -413,6 +413,33 @@ public class ComandaTests
 
         Assert.Equal("Estorne os pagamentos antes de cancelar a comanda.", excecao.Message);
     }
+    [Fact]
+public void TrocarMesa_DeveLiberarAnteriorEOcuparNova()
+{
+    var mesaAntiga = new Mesa(1, 4);
+    var mesaNova = new Mesa(2, 6);
+    var comanda = new Comanda(mesaAntiga, NovoGarcom());
+
+    comanda.TrocarMesa(mesaNova);
+
+    Assert.Equal(mesaNova.Id, comanda.MesaId);
+    Assert.Equal(StatusMesa.Livre, mesaAntiga.Status);
+    Assert.Equal(StatusMesa.Ocupada, mesaNova.Status);
+}
+
+[Fact]
+public void TrocarMesa_ParaMesaOcupada_DeveManterComandaNaMesaOriginal()
+{
+    var mesaOcupada = new Mesa(2, 4);
+    _ = new Comanda(mesaOcupada, NovoGarcom());
+    var mesaOriginal = new Mesa(1, 4);
+    var comanda = new Comanda(mesaOriginal, NovoGarcom());
+
+    Assert.Throws<DomainException>(() => comanda.TrocarMesa(mesaOcupada));
+
+    Assert.Equal(mesaOriginal.Id, comanda.MesaId);
+    Assert.Equal(StatusMesa.Ocupada, mesaOriginal.Status);
+}
 
     private static Mesa NovaMesa() => new(1, 4);
 

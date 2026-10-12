@@ -213,6 +213,35 @@ public class ComandasController(ComandixDbContext context) : ApiControllerBase
         return Ok(comanda.ToResponse());
     }
 
+    [HttpPost("{id:guid}/trocar-mesa")]
+[Authorize(Roles = Perfis.Salao)]
+[ProducesResponseType(StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+[ProducesResponseType(StatusCodes.Status409Conflict)]
+public async Task<ActionResult<ComandaResponse>> TrocarMesa(Guid id, TrocarMesaRequest request)
+{
+    var comanda = await ObterComanda(id);
+    if (comanda is null)
+        return NotFound();
+
+    var mesa = await context.Mesas.FindAsync(request.MesaId);
+    if (mesa is null)
+        return RequisicaoInvalida("Mesa não encontrada.");
+
+    comanda.TrocarMesa(mesa);
+
+    try
+    {
+        await context.SaveChangesAsync();
+    }
+    catch (DbUpdateException)
+    {
+        return Conflito("A mesa escolhida acabou de ser ocupada.");
+    }
+
+    return Ok(comanda.ToResponse());
+}
+
     [HttpPost("{id:guid}/pagamentos")]
     [Authorize(Roles = Perfis.Fechamento)]
     [ProducesResponseType(StatusCodes.Status200OK)]

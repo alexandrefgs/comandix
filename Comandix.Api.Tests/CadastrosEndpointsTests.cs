@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Comandix.Api.Dtos;
 using Comandix.Api.Tests.Infra;
+using Comandix.Domain.Enums;
 
 namespace Comandix.Api.Tests;
 
@@ -143,4 +144,20 @@ public class CadastrosEndpointsTests(ComandixApiFactory factory) : ApiTestBase(f
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+    [Fact]
+public async Task TrocarMesa_DeveMoverComandaELiberarMesaAnterior()
+{
+    var mesaAntiga = await CriarMesa();
+    var mesaNova = await CriarMesa();
+    var comanda = await AbrirComanda(mesaAntiga.Id, (await CriarGarcom()).Id);
+
+    comanda = await PostAsync<ComandaResponse>(
+        $"api/comandas/{comanda.Id}/trocar-mesa",
+        new TrocarMesaRequest(mesaNova.Id)
+    );
+
+    Assert.Equal(mesaNova.Id, comanda.MesaId);
+    Assert.Equal(StatusMesa.Livre, (await GetAsync<MesaResponse>($"api/mesas/{mesaAntiga.Id}")).Status);
+    Assert.Equal(StatusMesa.Ocupada, (await GetAsync<MesaResponse>($"api/mesas/{mesaNova.Id}")).Status);
+}
 }

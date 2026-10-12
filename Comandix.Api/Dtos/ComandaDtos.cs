@@ -29,6 +29,8 @@ public record AtribuirItemRequest(
 
 public record TaxaServicoRequest(bool Cobrar);
 
+public record TrocarMesaRequest(Guid MesaId);
+
 public record RegistrarPagamentoRequest(
     [EnumDataType(typeof(FormaPagamento), ErrorMessage = "Forma de pagamento inválida.")]
         FormaPagamento Forma,
