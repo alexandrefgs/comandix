@@ -62,6 +62,33 @@ export interface ComandaDetalhe {
   pagamentos: PagamentoComanda[];
 }
 
+export type TipoEventoComanda =
+  | 'Abertura'
+  | 'ItemAdicionado'
+  | 'ItemEmPreparo'
+  | 'ItemPronto'
+  | 'ItemEntregue'
+  | 'ItemCancelado'
+  | 'ItemAtribuido'
+  | 'PessoasDefinidas'
+  | 'PessoaRenomeada'
+  | 'TaxaServicoAlterada'
+  | 'MesaTrocada'
+  | 'PagamentoRegistrado'
+  | 'PagamentoEstornado'
+  | 'Fechamento'
+  | 'Cancelamento';
+
+export interface EventoComanda {
+  id: string;
+  tipo: TipoEventoComanda;
+  descricao: string;
+  funcionarioId: string;
+  funcionario: string;
+  valor: number | null;
+  ocorridoEm: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ComandaService {
   private readonly http = inject(HttpClient);
@@ -93,5 +120,8 @@ export class ComandaService {
 
   trocarMesa(id: string, mesaId: string): Observable<ComandaDetalhe> {
     return this.http.post<ComandaDetalhe>(`/api/comandas/${id}/trocar-mesa`, { mesaId });
+  }
+  historico(id: string): Observable<EventoComanda[]> {
+    return this.http.get<EventoComanda[]>(`/api/comandas/${id}/historico`);
   }
 }

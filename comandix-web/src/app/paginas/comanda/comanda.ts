@@ -14,6 +14,7 @@ import { mensagemDeErro } from '../../api/erros';
 import { Mesa, SalaoService } from '../../api/salao.service';
 import { AuthService } from '../../auth/auth.service';
 import { tempoDecorrido } from '../../util/tempo';
+import { HistoricoComanda } from './historico-comanda';
 import { NovoPedido } from './novo-pedido';
 
 type Severidade = 'success' | 'secondary' | 'warn' | 'danger';
@@ -36,6 +37,7 @@ const ORDEM_STATUS: Record<StatusItem, number> = {
     DialogModule,
     TagModule,
     NovoPedido,
+    HistoricoComanda,
   ],
   template: `
     @if (comanda(); as c) {
@@ -66,12 +68,20 @@ const ORDEM_STATUS: Record<StatusItem, number> = {
               }
             </div>
 
-            @if (podeEditar()) {
-              <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2 sm:justify-end">
+              @if (ehGerente()) {
+                <p-button
+                  label="Histórico da mesa"
+                  severity="secondary"
+                  [text]="true"
+                  (onClick)="dialogoHistorico.set(true)"
+                />
+              }
+              @if (podeEditar()) {
                 <p-button label="Trocar mesa" severity="secondary" [outlined]="true" (onClick)="abrirTrocaMesa()" />
                 <p-button label="Adicionar itens" (onClick)="dialogoPedido.set(true)" />
-              </div>
-            }
+              }
+            </div>
           </div>
         </div>
 
@@ -159,6 +169,10 @@ const ORDEM_STATUS: Record<StatusItem, number> = {
 
     <app-novo-pedido [comandaId]="id()" [(visivel)]="dialogoPedido" (enviado)="recarregar()" />
 
+    @if (ehGerente()) {
+      <app-historico-comanda [comandaId]="id()" [(visivel)]="dialogoHistorico" />
+    }
+
     <p-dialog
       [visible]="dialogoTrocaMesa()"
       (visibleChange)="dialogoTrocaMesa.set($event)"
@@ -228,9 +242,12 @@ export class Comanda {
   protected readonly processando = signal<string | null>(null);
 
   protected readonly dialogoPedido = signal(false);
+  protected readonly dialogoHistorico = signal(false);
   protected readonly dialogoTrocaMesa = signal(false);
   protected readonly mesasLivres = signal<Mesa[]>([]);
   protected readonly trocandoMesa = signal(false);
+
+  protected readonly ehGerente = computed(() => this.auth.cargo() === 'Gerente');
 
   protected readonly podeEditar = computed(() => {
     const cargo = this.auth.cargo();
