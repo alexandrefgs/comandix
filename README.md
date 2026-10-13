@@ -36,7 +36,9 @@ Full-stack: **API em ASP.NET Core** e **front-end em Angular** com renderizaçã
 
 ### No celular
 
-<img src="docs/imagens/iphone-mesas.png" alt="Mapa de mesas no celular" width="320">
+<p align="center">
+  <img src="docs/imagens/iphone-mesas.png" alt="Mapa de mesas no celular" width="260">
+</p>
 
 </details>
 
