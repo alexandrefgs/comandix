@@ -9,13 +9,36 @@ Full-stack: **API em ASP.NET Core** e **front-end em Angular** com renderizaçã
 
 ## Telas
 
-| Mapa de mesas | Comanda |
-|---|---|
-| ![Mapa de mesas](docs/imagens/mesas.png) | ![Comanda](docs/imagens/comanda.png) |
+![Mapa de mesas](docs/imagens/mesas-garcom.png)
 
-| Divisão da conta | Histórico da mesa |
+| Comanda | Divisão da conta |
 |---|---|
-| ![Divisão da conta](docs/imagens/conta.png) | ![Histórico da mesa](docs/imagens/historico.png) |
+| ![Comanda com itens em cada status](docs/imagens/comanda-itens.png) | ![Divisão da conta entre pessoas](docs/imagens/conta.png) |
+
+| Quem consumiu cada item | Histórico da mesa |
+|---|---|
+| ![Atribuição de itens às pessoas](docs/imagens/quem-paga.png) | ![Histórico de ações da comanda](docs/imagens/historico-mesa.png) |
+
+<details>
+<summary><strong>Mais telas</strong></summary>
+
+### Acesso
+
+| Gerente e caixa | Garçom e cozinha | PIN do crachá |
+|---|---|---|
+| ![Login com usuário e senha](docs/imagens/login-admin.png) | ![Login pelo crachá](docs/imagens/login-garcom.png) | ![Digitação do PIN](docs/imagens/pin-garcom.png) |
+
+### Histórico
+
+| Cancelamentos | Preparo e entrega |
+|---|---|
+| ![Histórico com item cancelado](docs/imagens/historico-cancelado.png) | ![Histórico com preparo e entrega](docs/imagens/historico-outros.png) |
+
+### No celular
+
+<img src="docs/imagens/iphone-mesas.png" alt="Mapa de mesas no celular" width="320">
+
+</details>
 
 ## Funcionalidades
 
