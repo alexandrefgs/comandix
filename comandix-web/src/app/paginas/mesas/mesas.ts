@@ -11,11 +11,11 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { Observable, forkJoin, timer } from 'rxjs';
-import { tempoDecorrido } from '../../util/tempo';
 
 import { mensagemDeErro } from '../../api/erros';
 import { ComandaResumo, Funcionario, Mesa, MesaDados, SalaoService } from '../../api/salao.service';
 import { AuthService } from '../../auth/auth.service';
+import { tempoDecorrido } from '../../util/tempo';
 
 interface MesaNoMapa {
   mesa: Mesa;
@@ -103,7 +103,10 @@ const INTERVALO_ATUALIZACAO = 15_000;
                     {{ comanda.total | currency }}
                   </span>
                   <span class="max-w-full truncate text-sm text-slate-500 dark:text-slate-400">
-                    {{ comanda.garcom }} · {{ tempoAberta(comanda.abertaEm) }}
+                    {{ comanda.garcom }}
+                  </span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ tempoAberta(comanda.abertaEm) }}
                   </span>
                 } @else {
                   <span class="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Livre</span>
@@ -161,7 +164,7 @@ const INTERVALO_ATUALIZACAO = 15_000;
       [breakpoints]="{ '640px': '95vw' }"
       [pt]="dialogoCentralizado"
     >
-            <div class="flex flex-col items-center gap-4 text-center">
+      <div class="flex flex-col items-center gap-4 text-center">
         <p class="text-slate-600 dark:text-slate-400">
           @if (ehGerente()) {
             Escolha o garçom responsável pela mesa.
@@ -206,6 +209,7 @@ const INTERVALO_ATUALIZACAO = 15_000;
       [draggable]="false"
       [style]="{ width: '24rem' }"
       [breakpoints]="{ '640px': '95vw' }"
+      [pt]="dialogoCentralizado"
     >
       <form [formGroup]="formMesa" class="grid grid-cols-2 gap-4 pt-1">
         <div class="flex flex-col gap-2">
@@ -240,8 +244,10 @@ const INTERVALO_ATUALIZACAO = 15_000;
       </form>
 
       <ng-template #footer>
-        <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="dialogoMesa.set(false)" />
-        <p-button label="Salvar" [loading]="salvando()" (onClick)="salvarMesa()" />
+        <div class="flex w-full justify-center gap-2">
+          <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="dialogoMesa.set(false)" />
+          <p-button label="Salvar" [loading]="salvando()" (onClick)="salvarMesa()" />
+        </div>
       </ng-template>
     </p-dialog>
   `,
@@ -256,6 +262,11 @@ export class Mesas {
 
   protected readonly icones = { editar: Pencil, remover: Trash2 };
 
+  protected readonly dialogoCentralizado = {
+    header: 'relative justify-center',
+    headerActions: 'absolute right-4',
+  };
+
   protected readonly cartaoLivre =
     'border-emerald-200 bg-emerald-50/60 enabled:hover:border-emerald-400 dark:border-emerald-900 dark:bg-emerald-950/30 dark:enabled:hover:border-emerald-700';
   protected readonly cartaoOcupada =
@@ -264,8 +275,6 @@ export class Mesas {
     'rounded-lg bg-white/80 p-1.5 text-slate-600 shadow-sm hover:bg-white hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-slate-800';
   protected readonly botaoRemover =
     'rounded-lg bg-white/80 p-1.5 text-slate-600 shadow-sm hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-red-950 dark:hover:text-red-400';
-  protected readonly dialogoCentralizado = 
-    {header: 'relative justify-center',headerActions: 'absolute right-4',};
 
   protected readonly ehGerente = computed(() => this.auth.cargo() === 'Gerente');
 
@@ -408,7 +417,7 @@ export class Mesas {
     });
   }
 
-    protected tempoAberta(abertaEm: string): string {
+  protected tempoAberta(abertaEm: string): string {
     return tempoDecorrido(abertaEm, this.agora());
   }
 

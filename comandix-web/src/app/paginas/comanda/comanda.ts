@@ -6,6 +6,7 @@ import { ArrowLeft, LucideAngularModule, X } from 'lucide-angular';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { TabsModule } from 'primeng/tabs';
 import { TagModule } from 'primeng/tag';
 import { EMPTY, catchError, switchMap, timer } from 'rxjs';
 
@@ -14,6 +15,7 @@ import { mensagemDeErro } from '../../api/erros';
 import { Mesa, SalaoService } from '../../api/salao.service';
 import { AuthService } from '../../auth/auth.service';
 import { tempoDecorrido } from '../../util/tempo';
+import { ContaComanda } from './conta-comanda';
 import { HistoricoComanda } from './historico-comanda';
 import { NovoPedido } from './novo-pedido';
 
@@ -35,9 +37,11 @@ const ORDEM_STATUS: Record<StatusItem, number> = {
     LucideAngularModule,
     ButtonModule,
     DialogModule,
+    TabsModule,
     TagModule,
     NovoPedido,
     HistoricoComanda,
+    ContaComanda,
   ],
   template: `
     @if (comanda(); as c) {
@@ -93,68 +97,88 @@ const ORDEM_STATUS: Record<StatusItem, number> = {
           </p>
         }
 
-        <section class="flex flex-col gap-3">
-          <h2 class="text-lg font-semibold">Itens</h2>
-
-          @if (itensOrdenados().length === 0) {
-            <div
-              class="rounded-2xl border border-dashed border-slate-300 px-4 py-10 text-center text-slate-500 dark:border-slate-700 dark:text-slate-400"
-            >
-              Nenhum item pedido ainda.
-              @if (podeEditar()) {
-                Toque em "Adicionar itens" para começar.
+        <p-tabs [value]="aba()" (valueChange)="aba.set($event)">
+          <p-tablist>
+            <p-tab value="itens">Itens</p-tab>
+            <p-tab value="conta">
+              Conta
+              @if (c.saldo > 0) {
+                <span class="ml-1 text-xs font-normal text-slate-500 tabular-nums dark:text-slate-400">
+                  {{ c.saldo | currency }}
+                </span>
               }
-            </div>
-          } @else {
-            <ul
-              class="flex flex-col divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900"
-            >
-              @for (item of itensOrdenados(); track item.id) {
-                <li
-                  class="flex flex-wrap items-center gap-3 px-4 py-3"
-                  [class.opacity-60]="item.status === 'Cancelado'"
-                >
-                  <div class="min-w-0 flex-1">
-                    <p class="font-medium" [class.line-through]="item.status === 'Cancelado'">
-                      {{ item.quantidade }}× {{ item.nomeProduto }}
-                    </p>
-                    @if (item.observacao) {
-                      <p class="text-sm text-slate-500 dark:text-slate-400">{{ item.observacao }}</p>
+            </p-tab>
+          </p-tablist>
+
+          <p-tabpanels>
+            <p-tabpanel value="itens">
+              <div class="pt-2">
+                @if (itensOrdenados().length === 0) {
+                  <div
+                    class="rounded-2xl border border-dashed border-slate-300 px-4 py-10 text-center text-slate-500 dark:border-slate-700 dark:text-slate-400"
+                  >
+                    Nenhum item pedido ainda.
+                    @if (podeEditar()) {
+                      Toque em "Adicionar itens" para começar.
                     }
                   </div>
-
-                  <span class="text-sm tabular-nums" [class.line-through]="item.status === 'Cancelado'">
-                    {{ item.subtotal | currency }}
-                  </span>
-                  <p-tag [value]="rotuloStatus[item.status]" [severity]="severidadeStatus[item.status]" />
-
-                  @if (podeEditar()) {
-                    @if (item.status === 'Pronto') {
-                      <p-button
-                        label="Entregar"
-                        size="small"
-                        severity="success"
-                        [loading]="processando() === item.id"
-                        (onClick)="entregar(item)"
-                      />
-                    }
-                    @if (item.status !== 'Entregue' && item.status !== 'Cancelado') {
-                      <button
-                        type="button"
-                        class="rounded-lg p-2 text-slate-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400"
-                        [attr.aria-label]="'Cancelar ' + item.nomeProduto"
-                        title="Cancelar item"
-                        (click)="cancelarItem(item)"
+                } @else {
+                  <ul
+                    class="flex flex-col divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900"
+                  >
+                    @for (item of itensOrdenados(); track item.id) {
+                      <li
+                        class="flex flex-wrap items-center gap-3 px-4 py-3"
+                        [class.opacity-60]="item.status === 'Cancelado'"
                       >
-                        <lucide-icon [img]="icones.cancelar" [size]="16" />
-                      </button>
+                        <div class="min-w-0 flex-1">
+                          <p class="font-medium" [class.line-through]="item.status === 'Cancelado'">
+                            {{ item.quantidade }}× {{ item.nomeProduto }}
+                          </p>
+                          @if (item.observacao) {
+                            <p class="text-sm text-slate-500 dark:text-slate-400">{{ item.observacao }}</p>
+                          }
+                        </div>
+
+                        <span class="text-sm tabular-nums" [class.line-through]="item.status === 'Cancelado'">
+                          {{ item.subtotal | currency }}
+                        </span>
+                        <p-tag [value]="rotuloStatus[item.status]" [severity]="severidadeStatus[item.status]" />
+
+                        @if (podeEditar()) {
+                          @if (item.status === 'Pronto') {
+                            <p-button
+                              label="Entregar"
+                              size="small"
+                              severity="success"
+                              [loading]="processando() === item.id"
+                              (onClick)="entregar(item)"
+                            />
+                          }
+                          @if (item.status !== 'Entregue' && item.status !== 'Cancelado') {
+                            <button
+                              type="button"
+                              class="rounded-lg p-2 text-slate-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400"
+                              [attr.aria-label]="'Cancelar ' + item.nomeProduto"
+                              title="Cancelar item"
+                              (click)="cancelarItem(item)"
+                            >
+                              <lucide-icon [img]="icones.cancelar" [size]="16" />
+                            </button>
+                          }
+                        }
+                      </li>
                     }
-                  }
-                </li>
-              }
-            </ul>
-          }
-        </section>
+                  </ul>
+                }
+              </div>
+            </p-tabpanel>
+
+            <p-tabpanel value="conta">
+              <app-conta-comanda [comanda]="c" (atualizada)="atualizar($event)" />
+            </p-tabpanel>
+          </p-tabpanels>
+        </p-tabs>
       </div>
     } @else if (carregando()) {
       <p class="py-16 text-center text-slate-500 dark:text-slate-400">Carregando comanda...</p>
@@ -240,6 +264,7 @@ export class Comanda {
   protected readonly carregando = signal(true);
   protected readonly agora = signal(Date.now());
   protected readonly processando = signal<string | null>(null);
+  protected readonly aba = signal<string | number | undefined>('itens');
 
   protected readonly dialogoPedido = signal(false);
   protected readonly dialogoHistorico = signal(false);
@@ -292,6 +317,12 @@ export class Comanda {
       next: (comanda) => this.atualizar(comanda),
       error: (erro) => this.notificarErro(erro),
     });
+  }
+
+  protected atualizar(comanda: ComandaDetalhe): void {
+    this.comanda.set(comanda);
+    this.agora.set(Date.now());
+    this.carregando.set(false);
   }
 
   protected entregar(item: ItemComanda): void {
@@ -358,12 +389,6 @@ export class Comanda {
         this.abrirTrocaMesa();
       },
     });
-  }
-
-  private atualizar(comanda: ComandaDetalhe): void {
-    this.comanda.set(comanda);
-    this.agora.set(Date.now());
-    this.carregando.set(false);
   }
 
   private notificarErro(erro: unknown): void {

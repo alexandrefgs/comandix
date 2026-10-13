@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 export type StatusItem = 'Pendente' | 'EmPreparo' | 'Pronto' | 'Entregue' | 'Cancelado';
 export type StatusComanda = 'Aberta' | 'Fechada' | 'Cancelada';
+export type FormaPagamento = 'Dinheiro' | 'Pix' | 'CartaoDebito' | 'CartaoCredito';
 
 export interface ItemComanda {
   id: string;
@@ -30,7 +31,7 @@ export interface DivisaoPessoa {
 
 export interface PagamentoComanda {
   id: string;
-  forma: string;
+  forma: FormaPagamento;
   valor: number;
   valorRecebido: number;
   troco: number;
@@ -60,6 +61,13 @@ export interface ComandaDetalhe {
   itens: ItemComanda[];
   divisao: DivisaoPessoa[];
   pagamentos: PagamentoComanda[];
+}
+
+export interface NovoPagamento {
+  forma: FormaPagamento;
+  valor: number;
+  valorRecebido?: number;
+  pessoaId?: string;
 }
 
 export type TipoEventoComanda =
@@ -97,6 +105,10 @@ export class ComandaService {
     return this.http.get<ComandaDetalhe>(`/api/comandas/${id}`);
   }
 
+  historico(id: string): Observable<EventoComanda[]> {
+    return this.http.get<EventoComanda[]>(`/api/comandas/${id}/historico`);
+  }
+
   adicionarItem(
     id: string,
     produtoId: string,
@@ -121,7 +133,37 @@ export class ComandaService {
   trocarMesa(id: string, mesaId: string): Observable<ComandaDetalhe> {
     return this.http.post<ComandaDetalhe>(`/api/comandas/${id}/trocar-mesa`, { mesaId });
   }
-  historico(id: string): Observable<EventoComanda[]> {
-    return this.http.get<EventoComanda[]>(`/api/comandas/${id}/historico`);
+
+  definirPessoas(id: string, quantidade: number): Observable<ComandaDetalhe> {
+    return this.http.put<ComandaDetalhe>(`/api/comandas/${id}/pessoas`, { quantidade });
+  }
+
+  renomearPessoa(id: string, pessoaId: string, nome: string): Observable<ComandaDetalhe> {
+    return this.http.patch<ComandaDetalhe>(`/api/comandas/${id}/pessoas/${pessoaId}`, { nome });
+  }
+
+  atribuirItem(id: string, itemId: string, pessoaIds: string[]): Observable<ComandaDetalhe> {
+    return this.http.put<ComandaDetalhe>(`/api/comandas/${id}/itens/${itemId}/pagantes`, {
+      pessoaIds,
+    });
+  }
+
+  definirTaxaServico(id: string, cobrar: boolean): Observable<ComandaDetalhe> {
+    return this.http.patch<ComandaDetalhe>(`/api/comandas/${id}/taxa-servico`, { cobrar });
+  }
+
+  registrarPagamento(id: string, pagamento: NovoPagamento): Observable<ComandaDetalhe> {
+    return this.http.post<ComandaDetalhe>(`/api/comandas/${id}/pagamentos`, pagamento);
+  }
+
+  estornarPagamento(id: string, pagamentoId: string, motivo: string): Observable<ComandaDetalhe> {
+    return this.http.post<ComandaDetalhe>(
+      `/api/comandas/${id}/pagamentos/${pagamentoId}/estornar`,
+      { motivo }
+    );
+  }
+
+  fechar(id: string): Observable<ComandaDetalhe> {
+    return this.http.post<ComandaDetalhe>(`/api/comandas/${id}/fechar`, null);
   }
 }
